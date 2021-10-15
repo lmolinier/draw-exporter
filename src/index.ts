@@ -1,46 +1,72 @@
-import { app, BrowserWindow } from 'electron';
-import * as path from 'path';
+import { app, BrowserWindow, contextBridge, ipcMain } from 'electron';
 
-// Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
-  app.quit();
+import * as path from 'path';
+import { Command, program, OptionValues } from 'commander';
+import { cp } from 'original-fs';
+import { Diagram, MxFile } from './diagram';
+import { sheetsCommand } from './commands/sheets';
+import { exportCommand } from './commands/export';
+import { Exporter } from './electron';
+
+// Create the browser window.
+var browser: BrowserWindow = null
+
+async function main(): Promise<number> {
+  return new Promise<number>((resolve, reject) => {
+    const cli = program
+      .name("draw-exporter")
+      .version(app.getVersion());
+
+    sheetsCommand(cli);
+    exportCommand(cli);
+
+    cli.parseAsync(process.argv).then(() => {
+      resolve(0);
+    }).catch((reason: any) => {
+      console.log(`error: ${reason}`);
+      resolve(1);
+    }); 
+  });
 }
 
-const createWindow = (): void => {
-  // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    height: 600,
-    width: 800,
-  });
-
-  // and load the index.html of the app.
-  mainWindow.loadFile(path.join(__dirname, '../src/index.html'));
-
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools();
-};
+main().then((code: number) => {
+  if(browser != null) {
+    browser.close();
+  }
+  process.exit(code)
+});
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', createWindow);
+app.on('ready', (event: Electron.Event) => {
+  try {
+    var debug = false;
+    browser = new BrowserWindow({
+      webPreferences: {
+        backgroundThrottling: false,
+        nodeIntegration: true,
+        contextIsolation: false,
+        nativeWindowOpen: true
+      },
+      show: debug,
+      frame: false,
+      enableLargerThanScreen: true,
+    });
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
+    if(debug) {
+      browser.webContents.openDevTools()
+    }
+
+    // and load the export3.html of draw.io app.
+    browser.loadFile(path.join(__dirname, '../drawio/src/main/webapp/export3.html'));
+
+    // set the browser instance in the exporter singleton
+    Exporter.getInstance().browser = browser;
+  } catch(e) {
+    if(browser != null)
+      browser.close()
+    console.error("error loading electron browser: ", e);
+    process.exit(1);
   }
 });
-
-app.on('activate', () => {
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
-  }
-});
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and import them here.
