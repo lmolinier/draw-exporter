@@ -8,9 +8,9 @@ jobs:
 
     strategy:
       matrix:
-        os: [""]
-        platform: [""]
-        arch: [""]
+        os: []
+        platform: []
+        arch: []
         include:
         - os: "ubuntu-latest"
           platform: "linux"
