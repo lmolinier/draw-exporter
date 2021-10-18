@@ -37,5 +37,8 @@ jobs:
         if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn
 
-      - name: Build
+      - name: Typsecript build
+        run: yarn tsc
+        
+      - name: Package
         run: yarn run make --platform ${{ matrix.platform }} --target ${{ matrix.target }} --arch ${{ matrix.arch }}
