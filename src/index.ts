@@ -1,12 +1,10 @@
-import { app, BrowserWindow, contextBridge, ipcMain } from 'electron';
+import { app, BrowserWindow } from 'electron';
 
 import * as path from 'path';
-import { Command, program, OptionValues } from 'commander';
-import { cp } from 'original-fs';
-import { Diagram, MxFile } from './diagram';
+import { program } from 'commander';
 import { sheetsCommand } from './commands/sheets';
 import { exportCommand } from './commands/export';
-import { Exporter } from './electron';
+import { Exporter } from './exporter';
 
 // Create the browser window.
 var browser: BrowserWindow = null

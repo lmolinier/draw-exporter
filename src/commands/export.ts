@@ -1,5 +1,5 @@
 import { Command, OptionValues } from "commander";
-import { Exporter, ExportParams, ExportResult } from "../electron";
+import { Exporter, ExportParams, ExportResult } from "../exporter";
 import { MxFile, Diagram } from "../diagram";
 import * as fs from 'fs';
 
