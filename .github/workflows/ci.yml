@@ -22,5 +22,8 @@ jobs:
         with:
           node-version: 14
 
+      - name: Install dependencies
+        run: yarn
+        
       - name: Build
         run: yarn run make --platform ${{ matrix.platform }} --target ${{ matrix.target }} --arch ${{ matrix.arch }}
