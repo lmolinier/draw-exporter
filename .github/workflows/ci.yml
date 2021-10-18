@@ -69,10 +69,10 @@ jobs:
       run: yarn tsc
 
     - name: Package
-      run: yarn run make --platform ${{ matrix.platform }} --target ${{ matrix.target }} --arch ${{ matrix.arch }}
+      run: yarn run make --platform ${{ matrix.platform }} --targets ${{ matrix.target }} --arch ${{ matrix.arch }}
           
     - uses: actions/upload-artifact@v2
       if: success()
       with:
-        name: draw-export${{ matrix.platform }}-${{ matrix.arch }}.${{ matrix.target }}
+        name: draw-exporter-${{ matrix.platform }}-${{ matrix.arch }}.${{ matrix.target }}
         path: out/make/${{ matrix.target }}/${{ matrix.arch }}/*
