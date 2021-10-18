@@ -8,26 +8,10 @@ jobs:
 
     strategy:
       matrix:
-        os: []
-        platform: []
-        arch: []
-        include:
-        - os: "ubuntu-latest"
-          platform: "linux"
-          target: "zip"
-          arch: "x64"
-        - os: "ubuntu-latest"
-          platform: "linux"
-          target: "deb"
-          arch: "x64"
-        - os: "ubuntu-latest"
-          platform: "linux"
-          target: "zip"
-          arch: "arm64"
-        - os: "ubuntu-latest"
-          platform: "linux"
-          target: "deb"
-          arch: "arm64"
+        os: ["ubuntu-latest"]
+        arch: ["x64", "arm64"]
+        platform: ["linux"]
+        target: ["deb", "rpm"]
 
     steps:
       - name: Check out Git repository
