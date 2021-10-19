@@ -73,7 +73,9 @@ jobs:
       run: yarn tsc
 
     - name: Package
-      run: yarn run make --platform ${{ matrix.platform }} --targets ${{ matrix.target }} --arch ${{ matrix.arch }}
+      run: |
+        yarn run make --platform ${{ matrix.platform }} --targets ${{ matrix.target }} --arch ${{ matrix.arch }}
+        ls -lR .
           
     - uses: actions/upload-artifact@v2
       if: success()
