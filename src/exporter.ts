@@ -1,8 +1,10 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import * as events from 'events';
-import * as path from 'path';
+import { Category } from 'typescript-logging';
 
 const MICRON_TO_PIXEL = 264.58 		//264.58 micron = 1 pixel
+        
+const log = new Category("electron");
 
 class RenderInfo {
   pageCount: number
@@ -19,6 +21,7 @@ export class ExportParams {
   crop: boolean;
   format: 'pdf' | 'xml';
   sheet: number;
+  layers: string[];
 }
 
 export class ExportResult {
@@ -30,6 +33,9 @@ export class Exporter extends events.EventEmitter {
 
   // Create the browser window.
   _browser: BrowserWindow = null;
+
+  _verbose = false;
+  _trace = false;
 
   /**
    * The static method that controls the access to the exporter instance.
@@ -56,9 +62,12 @@ export class Exporter extends events.EventEmitter {
     return this._browser;
   }
 
+  public set verbose(v: boolean) {
+	this._verbose = v;
+  }
+
   public export(xmlData: string, params: ExportParams): Promise<ExportResult> {
     return new Promise<ExportResult>((resolve, reject) => {
-      console.log("calling export")
       ipcMain
       /*.once('export-finalize', (event: Electron.IpcMainEvent) => {
         console.log("export-finalize")
@@ -77,13 +86,10 @@ export class Exporter extends events.EventEmitter {
         }
         
         //For some reason, Electron 9 doesn't send this object as is without stringifying. Usually when variable is external to function own scope
-				try {
-					ri.bounds = JSON.parse(renderInfo.bounds);
-				}
-				catch(e) {}
-
-        console.log("renderInfo");
-        console.log(ri);
+		try {
+			ri.bounds = JSON.parse(renderInfo.bounds);
+		}
+		catch(e) {}
 
         if (ri.bounds == null || ri.bounds.width < 5 || ri.bounds.height < 5) {
           //A workaround to detect errors in the input file or being empty file
@@ -111,14 +117,18 @@ export class Exporter extends events.EventEmitter {
       });
 
       /* Let's go and ask for the rendering */
-      console.log(params);
+	  log.debug(`export params: ${JSON.stringify(params)}`);
       var p: any = {
         xml: xmlData, // put the xmlData inside the structure
         scale: (params.crop && (params.scale == null || params.scale == 1)) ? 1.00001: (params.scale || 1),
         format: params.format,
         from: params.sheet,
         to: params.sheet,
+		extras: JSON.stringify({
+			layerIds: params.layers,
+		}),
       };
+	  log.trace(`calling render`);
       this._browser.webContents.send('render', p);
     });
   }

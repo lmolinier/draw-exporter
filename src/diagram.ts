@@ -1,5 +1,14 @@
+import { ipcRenderer } from 'electron';
 import * as fs from 'fs';
+import { cp } from 'original-fs';
 import {Parser} from 'xml2js';
+
+export class Layer {
+    id: string;
+    name?: string;
+    style?: string;
+    visible: boolean;
+}
 
 export class Diagram {
     id: string;
@@ -11,7 +20,27 @@ export class Diagram {
         this.id = id;
         this.name = name;
         this.index = index;
-        this.content = content;
+        this.content = content[0];
+    }
+
+    get layers(): Map<String, Layer> {
+        var layers = new Map<String, Layer>();
+        this.content.root[0].mxCell
+            .filter((elt: any) => {
+                if(elt.$.parent === undefined || elt.$.parent != "0")
+                    return false;
+                return true;
+            })
+            .forEach((it: any) => {
+                var name =  it.$.id=='1'?'background':it.$.value
+                layers.set(name, {
+                    id: it.$.id,
+                    name: name,
+                    style: it.$.style,
+                    visible: !(it.$.visible == '0'),
+                })
+            });
+        return layers;
     }
 }
 

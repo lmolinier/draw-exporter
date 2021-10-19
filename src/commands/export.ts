@@ -1,27 +1,30 @@
 import { Command, OptionValues } from "commander";
 import { Exporter, ExportParams, ExportResult } from "../exporter";
-import { MxFile, Diagram } from "../diagram";
+import { MxFile, Diagram, Layer } from "../diagram";
 import * as fs from 'fs';
+import { SetupLogging, WithLoggingOptions } from "../logging";
+import { Category } from "typescript-logging";
+
+const log = new Category("export");
 
 export function exportCommand(cli: Command) {
-    cli.command("export <input-file>")
+    WithLoggingOptions(cli.command("export <input-file>")
     .description("Export diagram")
-    .option("-v, --verbose", "verbose output", false)
-    .option("-t, --trace", "enable traces", false)
-
+    )
     .option("-f, --format <extension>", "export format (pdf, png, svg)", 'pdf')
     .option("-c, --crop", "crop to content", true)
+    
     .option("-s, --sheet <name>", "select sheet to print by its name (default: first)", null)
-    .option("-i, --sheet-index <number>", "select sheet by it index (if --sheet is not set)", "0")
+    .option("--sheet-index <number>", "select sheet by it index (if --sheet is not set)", "0")
+
+    .option("-l, --layers <layers>", "comma separated list of layers names to export (default: current view)", "")
+    .option("--layer-ids <layer-ids>", "comma separated list of layers ID to export (default: current view)", "")
+
     .action(function(inFile: string, opts: OptionValues) {
+        SetupLogging(opts);
         return new Promise<void>((resolve, reject) => {
             var mxf = new MxFile(inFile);
             mxf.parse().then((content: any) => {
-                if(opts.trace) {
-                    console.error(opts);
-                    console.error("XML content:");
-                    console.error(content);
-                }
 
                 // Get sheet-index given the sheet
                 var sheetIndex: number = Number(opts.sheetIndex);
@@ -36,12 +39,24 @@ export function exportCommand(cli: Command) {
                     });
                 }
 
+
+                var layers = new Set<string>();
+                opts.layers.split(',').filter((e: string) => e!='').forEach( (element: string) => {
+                    if(mxf.diagrams.get(sheetName).layers.has(element)) {
+                        layers.add(mxf.diagrams.get(sheetName).layers.get(element).id)
+                    }
+                });
+                opts.layerIds.split(',').filter((e: string) => e!='').forEach( (element: string) => {
+                    layers.add(element);
+                });
+
                 Exporter.getInstance().on('ready', (exporter: Exporter) => {                  
                     exporter.export(mxf.xml, {
                         scale: 1,
                         crop: opts.crop,
                         format: opts.format,
                         sheet: sheetIndex,
+                        layers: Array(...layers),
                     }).then( (res: ExportResult) => {
                         console.log(res.buffer.byteLength);
                         fs.writeFile(`./${sheetName}.pdf`, res.buffer, () => {

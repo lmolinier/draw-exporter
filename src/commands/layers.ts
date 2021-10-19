@@ -1,20 +1,20 @@
 import { Command, OptionValues } from "commander";
 import { SetupLogging, WithLoggingOptions } from "../logging";
-import { MxFile, Diagram } from "../diagram";
+import { MxFile, Diagram, Layer } from "../diagram";
 
-export function sheetsCommand(cli: Command) {
-    WithLoggingOptions(cli.command("sheets <input-file>")
-        .description("List all sheets available in the file")
+export function layersCommand(cli: Command) {
+    WithLoggingOptions(cli.command("layers <input-file> <sheet>")
+        .description("List all layers available in the sheet")
     )
-    .action(function(inFile: string, opts: OptionValues) {
+    .action(function(inFile: string, sheet: string, opts: OptionValues) {
         SetupLogging(opts);
         return new Promise<void>((resolve, reject) => {
             var mxf = new MxFile(inFile);
             mxf.parse().then((content: any) => {
-                mxf.diagrams?.forEach((d: Diagram) => {
-                    console.log(`${d.index}: ${d.name}`);
+                mxf.diagrams.get(sheet).layers.forEach( (l: Layer) => {
+                    console.log(`${l.id}: ${l.name}`);
                     if(opts.verbose) {
-                        console.log(`  id: ${d.id}`);
+                        console.log(`  visible: ${l.visible}`);
                     }
                 });
                 resolve();
