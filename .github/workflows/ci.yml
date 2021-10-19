@@ -75,10 +75,9 @@ jobs:
     - name: Package
       run: |
         yarn run make --platform ${{ matrix.platform }} --targets ${{ matrix.target }} --arch ${{ matrix.arch }}
-        ls -lR .
           
     - uses: actions/upload-artifact@v2
       if: success()
       with:
         name: draw-exporter-${{ matrix.platform }}-${{ matrix.arch }}.${{ matrix.target }}
-        path: out/make/${{ matrix.target }}/${{ matrix.arch }}/*
+        path: out/make/*
