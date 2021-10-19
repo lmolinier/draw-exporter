@@ -1,5 +1,6 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { NativeImage, BrowserWindow, ipcMain, nativeImage, app } from 'electron';
 import * as events from 'events';
+import * as path from 'path';
 import { Category } from 'typescript-logging';
 
 const MICRON_TO_PIXEL = 264.58 		//264.58 micron = 1 pixel
@@ -16,12 +17,24 @@ class RenderInfo {
   }
 } 
 
+export class BitmapParams {
+	width?: number
+	height?: number
+}
+
+export class PngParams extends BitmapParams {
+	dpi?: number
+	embedxml?: boolean
+	transparent?: boolean
+}
+
 export class ExportParams {
   scale: number | 'auto' | null;
   crop: boolean;
-  format: 'pdf' | 'xml';
+  format: 'pdf' | 'png';
   sheet: number;
   layers: string[];
+  options?: PngParams | BitmapParams;
 }
 
 export class ExportResult {
@@ -34,6 +47,7 @@ export class Exporter extends events.EventEmitter {
   // Create the browser window.
   _browser: BrowserWindow = null;
 
+  _ready = false;
   _verbose = false;
   _trace = false;
 
@@ -47,11 +61,24 @@ export class Exporter extends events.EventEmitter {
       return Exporter.instance;
   }
 
+  public static exit() {
+	Exporter.getInstance()._browser?.close();
+  }
+
+  bindElectron() {
+	// This method will be called when Electron has finished
+	// initialization and is ready to create browser windows.
+	// Some APIs can only be used after this event occurs.
+	app.on('ready', (event: Electron.Event) => {
+		this.emit('ready', this);
+	});
+  }
+
   public set browser(b: BrowserWindow) {
       this._browser = b;
       b.webContents
         .on('did-finish-load', () => {
-          this.emit('ready', this);
+          this.emit('loaded', this);
         })
         .on('console-message', (event: Electron.Event, level: number, message: string, line: number, sourceId: string) => {
           console.log(`[${level}] ${message} ${sourceId} (${line})`);
@@ -67,6 +94,53 @@ export class Exporter extends events.EventEmitter {
   }
 
   public export(xmlData: string, params: ExportParams): Promise<ExportResult> {
+	  return new Promise<ExportResult>((resolve, reject) => {
+		this._load_browser(params).then( (browser) => {
+			this._browser = browser;
+			this._export(xmlData, params).then( (result: ExportResult) => {
+				resolve(result);
+			}).catch( (reason: any) => {
+				reject(reason);
+			})
+		}).catch( (reason: any) => {
+			reject(reason);
+		})
+	  });
+  }
+
+  public _load_browser(params: ExportParams): Promise<BrowserWindow> {
+	return new Promise<BrowserWindow>((resolve, reject) => {
+		var browser = new BrowserWindow({
+			webPreferences: {
+			  backgroundThrottling: false,
+			  nodeIntegration: true,
+			  contextIsolation: false,
+			  nativeWindowOpen: true
+			},
+			show: false,
+			frame: false,
+			transparent: params.format == 'png' ? (params.options as PngParams)?.transparent : false,
+			enableLargerThanScreen: true,
+		  });
+	  
+		  if(false) {
+			browser.webContents.openDevTools()
+		  }
+	  
+		  // and load the export3.html of draw.io app.
+		  browser.loadFile(path.join(__dirname, '../drawio/src/main/webapp/export3.html'));
+
+		  browser.webContents
+		  .on('did-finish-load', () => {
+			resolve(browser);
+		  })
+		  .on('console-message', (event: Electron.Event, level: number, message: string, line: number, sourceId: string) => {
+			console.log(`[${level}] ${message} ${sourceId} (${line})`);
+		  });
+	});
+  }
+
+  public _export(xmlData: string, params: ExportParams): Promise<ExportResult> {
     return new Promise<ExportResult>((resolve, reject) => {
       ipcMain
       /*.once('export-finalize', (event: Electron.IpcMainEvent) => {
@@ -102,6 +176,9 @@ export class Exporter extends events.EventEmitter {
           case 'pdf':
             p = this._exportPdf(params, ri);
             break;
+		  case 'png':
+			p = this._exportPng(params, ri);
+			break;
           default:
             reject(`Invalid format: ${params.format}`);
             return;
@@ -124,6 +201,7 @@ export class Exporter extends events.EventEmitter {
         format: params.format,
         from: params.sheet,
         to: params.sheet,
+		// extras parameter is expected to be in json...
 		extras: JSON.stringify({
 			layerIds: params.layers,
 		}),
@@ -131,6 +209,25 @@ export class Exporter extends events.EventEmitter {
 	  log.trace(`calling render`);
       this._browser.webContents.send('render', p);
     });
+  }
+
+  _exportPng(params: ExportParams, ri: RenderInfo): Promise<Buffer> {
+	return new Promise<Buffer>((resolve, reject) => {
+		// Resize the browser window for a clean capture
+		this._browser.once("resize", () => {
+			this._browser.capturePage().then((image: Electron.NativeImage) => {
+				resolve(image.toPNG());
+			}).catch( (reason: any) => {
+				reject(reason);
+			});
+		});
+
+		//Adds an extra pixel to prevent scrollbars from showing
+		this._browser.setBounds({
+			width: Math.ceil(ri.bounds.width + ri.bounds.x) + 1,
+			height: Math.ceil(ri.bounds.height + ri.bounds.y) + 1
+		});
+	});
   }
 
   _exportPdf(params: ExportParams, ri: RenderInfo): Promise<Buffer> {    
@@ -153,11 +250,6 @@ export class Exporter extends events.EventEmitter {
     }
     
     return this.browser.webContents.printToPDF(pdfOptions);
-  }
-
-  _renderFinishedHandler(event: Electron.IpcMainEvent, renderInfo: any) {
-    console.log("renderInfo");
-    console.log(renderInfo);
   }
 
   /*
@@ -327,3 +419,5 @@ export class Exporter extends events.EventEmitter {
       */
 
 }
+
+Exporter.getInstance().bindElectron();

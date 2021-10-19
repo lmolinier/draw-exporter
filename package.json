@@ -34,6 +34,18 @@
           "name": "@electron-forge/maker-deb",
           "config": {}
         }
+      ],
+      "publishers": [
+        {
+          "name": "@electron-forge/publisher-github",
+          "config": {
+            "repository": {
+              "owner": "lmolinier",
+              "name": "draw-exporter"
+            },
+            "prerelease": true
+          }
+        }
       ]
     }
   },
@@ -43,6 +55,7 @@
     "@electron-forge/maker-rpm": "^6.0.0-beta.61",
     "@electron-forge/maker-squirrel": "^6.0.0-beta.61",
     "@electron-forge/maker-zip": "^6.0.0-beta.61",
+    "@electron-forge/publisher-github": "^6.0.0-beta.61",
     "@types/commander": "^2.12.2",
     "@types/xml-parser": "^1.2.30",
     "@types/xml2js": "^0.4.9",

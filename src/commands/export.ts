@@ -39,7 +39,6 @@ export function exportCommand(cli: Command) {
                     });
                 }
 
-
                 var layers = new Set<string>();
                 opts.layers.split(',').filter((e: string) => e!='').forEach( (element: string) => {
                     if(mxf.diagrams.get(sheetName).layers.has(element)) {
@@ -50,6 +49,7 @@ export function exportCommand(cli: Command) {
                     layers.add(element);
                 });
 
+                log.info("launching export...")
                 Exporter.getInstance().on('ready', (exporter: Exporter) => {                  
                     exporter.export(mxf.xml, {
                         scale: 1,
@@ -57,11 +57,15 @@ export function exportCommand(cli: Command) {
                         format: opts.format,
                         sheet: sheetIndex,
                         layers: Array(...layers),
+                        options: {
+                            transparent: true,
+                        }
                     }).then( (res: ExportResult) => {
-                        console.log(res.buffer.byteLength);
-                        fs.writeFile(`./${sheetName}.pdf`, res.buffer, () => {
+                        log.info(`export size ${res.buffer.byteLength}B`)
+                        fs.writeFile(`./${sheetName}.${opts.format}`, res.buffer, () => {
                             resolve();
                         });
+                        
                     }).catch( (reason: any) => {
                         reject(reason);
                     });

@@ -1,6 +1,4 @@
-import { ipcRenderer } from 'electron';
 import * as fs from 'fs';
-import { cp } from 'original-fs';
 import {Parser} from 'xml2js';
 
 export class Layer {
