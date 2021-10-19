@@ -1,7 +1,7 @@
 import { NativeImage, BrowserWindow, ipcMain, nativeImage, app } from 'electron';
 import * as events from 'events';
 import * as path from 'path';
-import { Category } from 'typescript-logging';
+import { Category, LogLevel } from 'typescript-logging';
 
 const MICRON_TO_PIXEL = 264.58 		//264.58 micron = 1 pixel
         
@@ -29,6 +29,7 @@ export class PngParams extends BitmapParams {
 }
 
 export class ExportParams {
+  show?: boolean;
   scale: number | 'auto' | null;
   crop: boolean;
   format: 'pdf' | 'png';
@@ -46,10 +47,6 @@ export class Exporter extends events.EventEmitter {
 
   // Create the browser window.
   _browser: BrowserWindow = null;
-
-  _ready = false;
-  _verbose = false;
-  _trace = false;
 
   /**
    * The static method that controls the access to the exporter instance.
@@ -74,23 +71,8 @@ export class Exporter extends events.EventEmitter {
 	});
   }
 
-  public set browser(b: BrowserWindow) {
-      this._browser = b;
-      b.webContents
-        .on('did-finish-load', () => {
-          this.emit('loaded', this);
-        })
-        .on('console-message', (event: Electron.Event, level: number, message: string, line: number, sourceId: string) => {
-          console.log(`[${level}] ${message} ${sourceId} (${line})`);
-        });
-  }
-
   public get browser() {
     return this._browser;
-  }
-
-  public set verbose(v: boolean) {
-	this._verbose = v;
   }
 
   public export(xmlData: string, params: ExportParams): Promise<ExportResult> {
@@ -117,25 +99,28 @@ export class Exporter extends events.EventEmitter {
 			  contextIsolation: false,
 			  nativeWindowOpen: true
 			},
-			show: false,
+			show: params.show,
 			frame: false,
 			transparent: params.format == 'png' ? (params.options as PngParams)?.transparent : false,
 			enableLargerThanScreen: true,
 		  });
 	  
-		  if(false) {
+		  if(params.show) {
 			browser.webContents.openDevTools()
 		  }
 	  
 		  // and load the export3.html of draw.io app.
 		  browser.loadFile(path.join(__dirname, '../drawio/src/main/webapp/export3.html'));
 
+		  // Wait for the complete logging.
 		  browser.webContents
 		  .on('did-finish-load', () => {
 			resolve(browser);
 		  })
+		  // Divert logs for convenience
 		  .on('console-message', (event: Electron.Event, level: number, message: string, line: number, sourceId: string) => {
-			console.log(`[${level}] ${message} ${sourceId} (${line})`);
+			var log = new Category("js");
+			log.log(level+1, `${message} ${sourceId} (${line})`, null);
 		  });
 	});
   }
