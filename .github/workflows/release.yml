@@ -3,13 +3,10 @@ on:
 
 name: Release
 
-env:
-  appname: owley
-  appkey: eu.molinier.owley
-
 jobs:
   create:
     runs-on: ubuntu-latest
+    needs: publish
     steps:
     - name: Download artifact
       uses: actions/download-artifact@v2
@@ -33,7 +30,6 @@ jobs:
 
   publish:
     runs-on: ubuntu-latest
-    needs: create
     steps:
     - name: Check out Git repository
       uses: actions/checkout@v1
