@@ -40,12 +40,6 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Extract tag name
-      id: tag
-      uses: olegtarasov/get-tag@v2.1
-      with:
-        tagRegex: "v(?<version>.*)"
-
     - name: Install Node.js, NPM and Yarn
       uses: actions/setup-node@v1
       with:
@@ -76,5 +70,4 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ github.token }}
       run: |
-        yarn version --new-version ${{ steps.tag.outputs.version }}
         yarn run publish --from-dry-run
