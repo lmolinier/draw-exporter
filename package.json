@@ -1,7 +1,7 @@
 {
   "name": "draw-exporter",
   "productName": "draw-exporter",
-  "version": "1.0.0",
+  "version": "v1.0.0",
   "description": "Draw.io exporter",
   "main": "dist/index.js",
   "scripts": {
