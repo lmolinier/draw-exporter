@@ -68,8 +68,23 @@ jobs:
     - name: Package
       run: |
         yarn run publish --dry-run
-          
+
+    - uses: actions/cache@v1
+      with:
+        path: out
+        key: out-${{ github.sha }}
+
+  build:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+    - uses: actions/cache@v1
+      id: out-cache # use this to check for `cache-hit` (`steps.out-cache.outputs.cache-hit != 'true'`)
+      with:
+        path: out
+        restore-key: out-${{ github.sha }}
+
     - name: Publish
-      if: success()
+      if: ${{ steps.out-cache.outputs.cache-hit }} == 'true'
       run: |
         yarn run publish --from-dry-run
