@@ -34,15 +34,8 @@ jobs:
       run: yarn
 
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     needs: setup
-
-    strategy:
-      matrix:
-        os: ["ubuntu-latest"]
-        arch: ["x64", "arm64"]
-        platform: ["linux"]
-        target: ["deb", "zip"]
 
     steps:
     - name: Check out Git repository
@@ -74,10 +67,9 @@ jobs:
 
     - name: Package
       run: |
-        yarn run make --platform ${{ matrix.platform }} --targets ${{ matrix.target }} --arch ${{ matrix.arch }}
+        yarn run publish --dry-run
           
-    - uses: actions/upload-artifact@v2
+    - name: Publish
       if: success()
-      with:
-        name: draw-exporter-${{ matrix.platform }}-${{ matrix.arch }}.${{ matrix.target }}
-        path: out/make/*
+      run: |
+        yarn run publish --from-dry-run

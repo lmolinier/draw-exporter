@@ -1,6 +1,5 @@
 import { app } from 'electron';
 
-import * as path from 'path';
 import { OptionValues, program } from 'commander';
 import { sheetsCommand } from './commands/sheets';
 import { layersCommand } from './commands/layers';
