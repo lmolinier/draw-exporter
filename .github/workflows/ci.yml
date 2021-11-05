@@ -110,5 +110,7 @@ jobs:
 
     - name: Publish
       if: ${{ steps.out-cache.outputs.cache-hit }} == 'true'
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
       run: |
         yarn run publish --from-dry-run
