@@ -82,7 +82,7 @@ jobs:
       id: out-cache # use this to check for `cache-hit` (`steps.out-cache.outputs.cache-hit != 'true'`)
       with:
         path: out
-        restore-key: out-${{ github.sha }}
+        key: out-${{ github.sha }}
 
     - name: Publish
       if: ${{ steps.out-cache.outputs.cache-hit }} == 'true'
