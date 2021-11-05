@@ -105,6 +105,9 @@ jobs:
         path: out
         key: out-${{ github.sha }}
 
+    - name: Install dependencies
+      run: yarn
+
     - name: Publish
       if: ${{ steps.out-cache.outputs.cache-hit }} == 'true'
       run: |
