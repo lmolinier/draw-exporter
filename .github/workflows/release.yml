@@ -28,8 +28,22 @@ jobs:
         draft: false
         prerelease: false
 
-  publish:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ${{ matrix.image }}
+    needs: setup
+
+    strategy:
+      matrix:
+        platform: ["linux", "win32", "macos"]
+        include: 
+        - platform: linux
+          image: ubuntu-latest
+        - platform: win32
+          image: windows-latest
+        - platform: macos
+          image: macos-latest
+      fail-fast: false
+
     steps:
     - name: Check out Git repository
       uses: actions/checkout@v1
@@ -56,7 +70,7 @@ jobs:
       id: out-cache # use this to check for `cache-hit` (`steps.out-cache.outputs.cache-hit != 'true'`)
       with:
         path: out
-        key: out-${{ github.sha }}
+        key: out-${{ matrix.platform }}-${{ github.sha }}
 
     - name: Install dependencies
       run: yarn
