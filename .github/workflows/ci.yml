@@ -34,8 +34,18 @@ jobs:
       run: yarn
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.image }}
     needs: setup
+
+    strategy:
+      matrix:
+        platform: ["linux", "win32"]
+        include: 
+        - platform: linux
+          image: ubuntu-latest
+        - platform: win32
+          image: windows-latest
+      fail-fast: false
 
     steps:
     - name: Check out Git repository
@@ -72,7 +82,7 @@ jobs:
     - uses: actions/cache@v1
       with:
         path: out
-        key: out-${{ github.sha }}
+        key: out-${{ matrix.platform }}-${{ github.sha }}
 
   publish:
     needs: [build]
