@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="3" failures="0" errors="0" time="2.084">
-  <testsuite name="parser tests" errors="0" failures="0" skipped="0" timestamp="2021-11-09T08:30:49" time="2.028" tests="3">
-    <testcase classname="parser tests loads a diagram with a compressed content" name="parser tests loads a diagram with a compressed content" time="0.015">
+<testsuites name="jest tests" tests="3" failures="0" errors="0" time="1.932">
+  <testsuite name="parser tests" errors="0" failures="0" skipped="0" timestamp="2021-11-09T08:47:16" time="1.868" tests="3">
+    <testcase classname="parser tests loads a diagram with a compressed content" name="parser tests loads a diagram with a compressed content" time="0.021">
     </testcase>
     <testcase classname="parser tests loads a diagram with a compressed content (second)" name="parser tests loads a diagram with a compressed content (second)" time="0.01">
     </testcase>
-    <testcase classname="parser tests loads a diagram with layers" name="parser tests loads a diagram with layers" time="0.088">
+    <testcase classname="parser tests loads a diagram with layers" name="parser tests loads a diagram with layers" time="0.107">
     </testcase>
   </testsuite>
 </testsuites>
