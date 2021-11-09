@@ -80,13 +80,28 @@ jobs:
     - name: Test
       run: |
         yarn test
+    
+    - name: Upload test results
+      if: success() || failure()
+      uses: actions/upload-artifact@v2
+      with:
+        name: test-results-${{ matrix.platform }}
+        path: junit.xml
+
+    - name: Create test report
+      uses: dorny/test-reporter@v1
+      if: success() || failure()
+      with:
+        name: JEST Tests ${{ matrix.platform }}
+        path: junit.xml
+        reporter: jest-junit
 
     - uses: actions/cache@v1
       with:
         path: out
         key: out-${{ matrix.platform }}-${{ github.sha }}
 
-        
+
   build:
     runs-on: ${{ matrix.image }}
     needs: test
