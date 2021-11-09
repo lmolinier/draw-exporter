@@ -86,7 +86,9 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: test-results-${{ matrix.platform }}
-        path: junit.xml
+        path: |
+          junit.xml
+          tests/__snapshots__/data
 
     - name: Create test report
       uses: dorny/test-reporter@v1
