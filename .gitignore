@@ -4,3 +4,4 @@ out
 
 *.pdf
 *.drawio
+yarn-error.log

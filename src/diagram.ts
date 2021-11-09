@@ -1,5 +1,7 @@
 import * as fs from 'fs';
 import {Parser} from 'xml2js';
+import 'pako';
+import pako from 'pako';
 
 export class Layer {
     id: string;
@@ -18,7 +20,7 @@ export class Diagram {
         this.id = id;
         this.name = name;
         this.index = index;
-        this.content = content[0];
+        this.content = content;
     }
 
     get layers(): Map<String, Layer> {
@@ -43,7 +45,7 @@ export class Diagram {
 }
 
 export class MxFile {
-    content?: any;
+    _diagrams: Map<String, Diagram>;
     fname: string;
     xml: string;
 
@@ -51,26 +53,33 @@ export class MxFile {
         this.fname = fname;
     }
 
-    parse(): Promise<any> {
-        return new Promise<any>((resolve, reject) => {
-            var data = fs.readFileSync(this.fname,'utf8');
-            var parser = new Parser();
-            var _this = this;
-            this.xml = data;
-            parser.parseString(data, function(err: Error, result: any) {
-                if(err) {
-                    reject(err);
-                    return;
-                }
-                _this.content = result.mxfile;
-                resolve(_this.content);
-            });
-        });
+    async parse(): Promise<any> {
+        
+        var data = fs.readFileSync(this.fname, 'utf8');
+        var parser = new Parser();
+        this.xml = data;
+
+        var result = await parser.parseStringPromise(data);
+        this._diagrams = new Map<String, Diagram>();   
+        
+        var i = 0;
+        var _this = this;
+        for await (const d of (result.mxfile.diagram as Array<any>) ) {
+            if (d.mxGraphModel !== undefined) {
+                _this._diagrams.set(d.$.name, new Diagram(d.$.id, d.$.name, i, d.mxGraphModel[0]));
+            } else {
+                // diagram data are b64/inflate
+                var b = Buffer.from(d._, 'base64')
+                var inflated = unescape(pako.inflateRaw(b, {to: "string"}));
+                
+                var d2 = await parser.parseStringPromise(inflated);
+                _this._diagrams.set(d.$.name, new Diagram(d.$.id, d.$.name, i, d2.mxGraphModel));                         
+            }
+            i++;
+        }
     } 
 
     get diagrams(): Map<String, Diagram> {
-        return new Map((this.content.diagram as Array<any>)?.map((d: any, i: number, a: Diagram[]) => {
-            return [d.$.name, new Diagram(d.$.id, d.$.name, i, d.mxGraphModel)];
-        }));
+        return this._diagrams
     }
 }
