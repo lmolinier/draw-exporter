@@ -1,4 +1,4 @@
-import { NativeImage, BrowserWindow, ipcMain, nativeImage, app } from 'electron';
+import { BrowserWindow, ipcMain, app } from 'electron';
 import * as events from 'events';
 import * as path from 'path';
 import { Category, LogLevel } from 'typescript-logging';
@@ -6,6 +6,8 @@ import { Category, LogLevel } from 'typescript-logging';
 const MICRON_TO_PIXEL = 264.58 		//264.58 micron = 1 pixel
         
 const log = new Category("electron");
+const jslog = new Category("js");
+
 
 class RenderInfo {
   pageCount: number
@@ -119,8 +121,7 @@ export class Exporter extends events.EventEmitter {
 		  })
 		  // Divert logs for convenience
 		  .on('console-message', (event: Electron.Event, level: number, message: string, line: number, sourceId: string) => {
-			var log = new Category("js");
-			log.log(level+1, `${message} ${sourceId} (${line})`, null);
+			jslog.log(level+1, `${message} ${sourceId} (${line})`, null);
 		  });
 	});
   }
@@ -405,4 +406,5 @@ export class Exporter extends events.EventEmitter {
 
 }
 
+// Bind to electron
 Exporter.getInstance().bindElectron();

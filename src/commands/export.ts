@@ -8,7 +8,7 @@ import { Category } from "typescript-logging";
 const log = new Category("export");
 
 export function exportCommand(cli: Command) {
-    WithLoggingOptions(cli.command("export <input-file>")
+    WithLoggingOptions(cli.command("export <input-file> <output-file>")
     .description("Export diagram")
     )
     .option("-f, --format <extension>", "export format (pdf, png, svg)", 'pdf')
@@ -20,7 +20,7 @@ export function exportCommand(cli: Command) {
     .option("-l, --layers <layers>", "comma separated list of layers names to export (default: current view)", "")
     .option("--layer-ids <layer-ids>", "comma separated list of layers ID to export (default: current view)", "")
 
-    .action(function(inFile: string, opts: OptionValues) {
+    .action(function(inFile: string, outFile: string, opts: OptionValues) {
         SetupLogging(opts);
         return new Promise<void>((resolve, reject) => {
             var mxf = new MxFile(inFile);
@@ -62,7 +62,13 @@ export function exportCommand(cli: Command) {
                         }
                     }).then( (res: ExportResult) => {
                         log.info(`export size ${res.buffer.byteLength}B`)
-                        fs.writeFile(`./${sheetName}.${opts.format}`, res.buffer, () => {
+                        if(outFile == "-") {
+                            fs.write(1, res.buffer, () => {
+                                resolve();
+                            });
+                            return;
+                        }
+                        fs.writeFile(outFile, res.buffer, () => {
                             resolve();
                         });
                         
