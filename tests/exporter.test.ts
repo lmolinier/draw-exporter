@@ -20,8 +20,8 @@ function match(buf:Buffer, snapshotName?: string) {
     fs.mkdirSync(path.join(__dirname, "__snapshots__", "data"), {recursive: true});
     fs.writeFileSync(path.join(__dirname, "__snapshots__", "data", `${fname}.pdf`), buf);
 
-    // Match to snapshot by removing the 1K header
-    expect(buf.slice(1024).toString("base64")).toMatchSnapshot();
+    // Match to snapshot by reversing and checking the first 8K (or 2K)
+    expect(buf.reverse().slice(0, buf.length>(10*1024)?8912:2048).toString("base64")).toMatchSnapshot();
 }
 
 describe('PDF exporter tests', () => {
