@@ -31,4 +31,7 @@ async function main(): Promise<number> {
 main().then((code: number) => {
   Exporter.exit();
   process.exit(code)
+}).catch((reason: any) => {
+  console.error(reason);
+  process.exit(1);
 });

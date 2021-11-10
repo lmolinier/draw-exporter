@@ -37,9 +37,6 @@ jobs:
     runs-on: ${{ matrix.image }}
     needs: setup
 
-    env:
-      DISPLAY: ":99"
-
     strategy:
       matrix:
         platform: ["linux", "win32", "macos"]
