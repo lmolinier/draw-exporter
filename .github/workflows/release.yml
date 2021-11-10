@@ -69,7 +69,7 @@ jobs:
       id: out-cache # use this to check for `cache-hit` (`steps.out-cache.outputs.cache-hit != 'true'`)
       with:
         path: out
-        key: out-${{ matrix.platform }}-${{ github.sha }}
+        key: out-${{ matrix.platform }}-${{ github.run_number }}
 
     - name: Install dependencies
       run: yarn
