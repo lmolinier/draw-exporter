@@ -2,7 +2,5 @@ dist
 node_modules
 out
 
-*.pdf
-*.drawio
 yarn-error.log
 junit.xml

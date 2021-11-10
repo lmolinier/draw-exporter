@@ -2,26 +2,38 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as child_process from 'child_process';
 
+import { Diff } from './diff';
+import { type } from 'os';
+import exp from 'constants';
+
 function launch(...args: string[]): Buffer {
     let cmd = "tsc && electron-forge start -- "+ args.map(v => `'${v}'`).join(" ")
     let result = child_process.spawnSync(cmd, {shell:true, cwd: path.resolve(__dirname, "..")});
-    //if(result.status != 0) {
+    if(result.status != 0) {
         console.log(result.stderr.toString());
-    //}
+    }
     expect(result.status).toBe(0);
     return result.stdout
 }
 
-function match(buf:Buffer, snapshotName?: string) {
+async function match(buf:Buffer, snapshotName?: string) {
     var fname = snapshotName;
     if(snapshotName === undefined) {
         fname = expect.getState().currentTestName;
     }
-    fs.mkdirSync(path.join(__dirname, "__snapshots__", "data"), {recursive: true});
-    fs.writeFileSync(path.join(__dirname, "__snapshots__", "data", `${fname}.pdf`), buf);
 
-    // Match to snapshot by reversing and checking the first 8K (or 2K)
-    expect(buf.reverse().slice(0, buf.length>(10*1024)?8912:2048).toString("base64")).toMatchSnapshot();
+    fs.mkdirSync(path.join(__dirname, "__snapshots__"), {recursive: true});
+    fs.writeFileSync(path.join(__dirname, "__snapshots__", `${fname}.cur.pdf`), buf);
+
+    var snap = fs.readFileSync(path.join(__dirname, "__snapshots__", `${fname}.snap.pdf`));
+
+    var d = new Diff(snap, buf, {threshold: 0.05});
+    let res = await d.compare()
+    if(typeof res == "boolean") {
+        expect(res).toEqual(true);
+    } else {
+        expect(res.reduce((sum, v) => sum + v.ndiff, 0)).toEqual(0);
+    }
 }
 
 describe('PDF exporter tests', () => {
@@ -29,7 +41,7 @@ describe('PDF exporter tests', () => {
         var fname = path.join(__dirname, 'drawio-diagrams', 'examples', 'AWSDiagram.xml');
 
         let out = launch("export", fname, "-");
-        match(out);
+        await match(out, 'AWSDiagram');
     })
 
     it('export only a layer', async () => {
