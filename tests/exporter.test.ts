@@ -27,6 +27,9 @@ async function match(buf:Buffer, snapshotName?: string) {
 
     var snap = fs.readFileSync(path.join(__dirname, "__snapshots__", `${fname}.snap.pdf`));
 
+    // Files under 2K are wierd!
+    expect(buf.length).toBeGreaterThan(2*1024);
+
     var d = new Diff(snap, buf, {threshold: 0.05});
     let res = await d.compare()
     if(typeof res == "boolean") {
