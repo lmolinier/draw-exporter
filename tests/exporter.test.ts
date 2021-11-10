@@ -7,12 +7,13 @@ import { type } from 'os';
 import exp from 'constants';
 
 function launch(...args: string[]): Buffer {
-    let cmd = "electron-forge start -- "+ args.map(v => `'${v}'`).join(" ")
-    child_process.spawnSync("tsc", {shell:true, cwd: path.resolve(__dirname, "..")});
+    let cmd = "electron-forge start -- "+ args.map(v => `'${v}'`).join(" ");   
+    console.log(cmd);
     let result = child_process.spawnSync(cmd, {shell:true, cwd: path.resolve(__dirname, "..")});
-    if(result.status != 0) {
+    //if(result.status != 0) {
         console.log(result.stderr.toString());
-    }
+    //}
+    console.log(result);
     expect(result.status).toBe(0);
     return result.stdout
 }
