@@ -157,7 +157,7 @@ jobs:
     - uses: actions/cache@v1
       with:
         path: out
-        key: out-${{ matrix.platform }}-${{ github.sha }}
+        key: out-${{ matrix.platform }}-${{ github.run_number }}
 
   publish:
     needs: [build]
