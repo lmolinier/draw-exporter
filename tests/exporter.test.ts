@@ -51,6 +51,6 @@ describe('PDF exporter tests', () => {
         var fname = path.join(__dirname, 'drawio-diagrams', 'training-diagrams', 'drawio layers example.xml');
 
         let out = launch("export", "--layers", "Level 1 - Template", fname, "-");
-        match(out);
+        await match(out);
     })
 })
