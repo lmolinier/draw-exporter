@@ -6,7 +6,7 @@ env:
   node-version: 14
 
 jobs:
-  setup:
+  prepare:
     runs-on: ubuntu-latest
     steps:
     - name: Check out Git repository
@@ -32,10 +32,16 @@ jobs:
 
     - name: Install dependencies
       run: yarn
+
+    - name: Linter
+      run: yarn lint
+
+    - name: Formatter
+      run: yarn format-check
       
   test:
     runs-on: ${{ matrix.image }}
-    needs: setup
+    needs: prepare
 
     strategy:
       matrix:

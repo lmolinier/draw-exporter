@@ -1,47 +1,46 @@
-import { BrowserWindow, ipcMain, app } from 'electron';
-import * as events from 'events';
-import * as path from 'path';
-import { Category, LogLevel } from 'typescript-logging';
+import { BrowserWindow, ipcMain, app } from "electron";
+import * as events from "events";
+import * as path from "path";
+import { Category, LogLevel } from "typescript-logging";
 
-const MICRON_TO_PIXEL = 264.58 		//264.58 micron = 1 pixel
-        
+const MICRON_TO_PIXEL = 264.58; //264.58 micron = 1 pixel
+
 const log = new Category("electron");
 const jslog = new Category("js");
 
-
 class RenderInfo {
-  pageCount: number
+  pageCount: number;
   bounds?: {
-    x: number
-    y: number
-    width: number
-    height: number
-  }
-} 
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+}
 
 export class BitmapParams {
-	width?: number
-	height?: number
+  width?: number;
+  height?: number;
 }
 
 export class PngParams extends BitmapParams {
-	dpi?: number
-	embedxml?: boolean
-	transparent?: boolean
+  dpi?: number;
+  embedxml?: boolean;
+  transparent?: boolean;
 }
 
 export class ExportParams {
   show?: boolean;
-  scale: number | 'auto' | null;
+  scale: number | "auto" | null;
   crop: boolean;
-  format: 'pdf' | 'png';
+  format: "pdf" | "png";
   sheet: number;
   layers: string[];
   options?: PngParams | BitmapParams;
 }
 
 export class ExportResult {
-  buffer: Buffer
+  buffer: Buffer;
 }
 
 export class Exporter extends events.EventEmitter {
@@ -54,23 +53,23 @@ export class Exporter extends events.EventEmitter {
    * The static method that controls the access to the exporter instance.
    */
   public static getInstance(): Exporter {
-      if (!Exporter.instance) {
-          Exporter.instance = new Exporter();
-      }
-      return Exporter.instance;
+    if (!Exporter.instance) {
+      Exporter.instance = new Exporter();
+    }
+    return Exporter.instance;
   }
 
   public static exit() {
-	Exporter.getInstance()._browser?.close();
+    Exporter.getInstance()._browser?.close();
   }
 
   bindElectron() {
-	// This method will be called when Electron has finished
-	// initialization and is ready to create browser windows.
-	// Some APIs can only be used after this event occurs.
-	app.on('ready', (event: Electron.Event) => {
-		this.emit('ready', this);
-	});
+    // This method will be called when Electron has finished
+    // initialization and is ready to create browser windows.
+    // Some APIs can only be used after this event occurs.
+    app.on("ready", (event: Electron.Event) => {
+      this.emit("ready", this);
+    });
   }
 
   public get browser() {
@@ -78,163 +77,193 @@ export class Exporter extends events.EventEmitter {
   }
 
   public export(xmlData: string, params: ExportParams): Promise<ExportResult> {
-	  return new Promise<ExportResult>((resolve, reject) => {
-		this._load_browser(params).then( (browser) => {
-			this._browser = browser;
-			this._export(xmlData, params).then( (result: ExportResult) => {
-				resolve(result);
-			}).catch( (reason: any) => {
-				reject(reason);
-			})
-		}).catch( (reason: any) => {
-			reject(reason);
-		})
-	  });
+    return new Promise<ExportResult>((resolve, reject) => {
+      this._load_browser(params)
+        .then((browser) => {
+          this._browser = browser;
+          this._export(xmlData, params)
+            .then((result: ExportResult) => {
+              resolve(result);
+            })
+            .catch((reason: any) => {
+              reject(reason);
+            });
+        })
+        .catch((reason: any) => {
+          reject(reason);
+        });
+    });
   }
 
   public _load_browser(params: ExportParams): Promise<BrowserWindow> {
-	return new Promise<BrowserWindow>((resolve, reject) => {
-		var browser = new BrowserWindow({
-			webPreferences: {
-			  backgroundThrottling: false,
-			  nodeIntegration: true,
-			  contextIsolation: false,
-			  nativeWindowOpen: true
-			},
-			show: params.show,
-			frame: false,
-			transparent: params.format == 'png' ? (params.options as PngParams)?.transparent : false,
-			enableLargerThanScreen: true,
-		  });
-	  
-		  if(params.show) {
-			browser.webContents.openDevTools()
-		  }
-	  
-		  // and load the export3.html of draw.io app.
-		  browser.loadFile(path.join(__dirname, '../drawio/src/main/webapp/export3.html'));
+    return new Promise<BrowserWindow>((resolve, reject) => {
+      var browser = new BrowserWindow({
+        webPreferences: {
+          backgroundThrottling: false,
+          nodeIntegration: true,
+          contextIsolation: false,
+          nativeWindowOpen: true,
+        },
+        show: params.show,
+        frame: false,
+        transparent:
+          params.format == "png"
+            ? (params.options as PngParams)?.transparent
+            : false,
+        enableLargerThanScreen: true,
+      });
 
-		  // Wait for the complete logging.
-		  browser.webContents
-		  .on('did-finish-load', () => {
-			resolve(browser);
-		  })
-		  // Divert logs for convenience
-		  .on('console-message', (event: Electron.Event, level: number, message: string, line: number, sourceId: string) => {
-			jslog.log(level+1, `${message} ${sourceId} (${line})`, null);
-		  });
-	});
+      if (params.show) {
+        browser.webContents.openDevTools();
+      }
+
+      // and load the export3.html of draw.io app.
+      browser.loadFile(
+        path.join(__dirname, "../drawio/src/main/webapp/export3.html")
+      );
+
+      // Wait for the complete logging.
+      browser.webContents
+        .on("did-finish-load", () => {
+          resolve(browser);
+        })
+        // Divert logs for convenience
+        .on(
+          "console-message",
+          (
+            event: Electron.Event,
+            level: number,
+            message: string,
+            line: number,
+            sourceId: string
+          ) => {
+            jslog.log(level + 1, `${message} ${sourceId} (${line})`, null);
+          }
+        );
+    });
   }
 
   public _export(xmlData: string, params: ExportParams): Promise<ExportResult> {
     return new Promise<ExportResult>((resolve, reject) => {
       ipcMain
-      /*.once('export-finalize', (event: Electron.IpcMainEvent) => {
+        /*.once('export-finalize', (event: Electron.IpcMainEvent) => {
         console.log("export-finalize")
         resolve(null);
       })*/
-      /*.once('xml-data', () => {
+        /*.once('xml-data', () => {
         console.log("xml-data")
       })
       .once('xml-data-error', () => {
         console.log("xml-data-error")
       })*/
-      .once('render-finished', (event: Electron.IpcMainEvent, renderInfo: any) => {
-        var ri: RenderInfo = {
-          pageCount: renderInfo.pageCount,
-          bounds: null,
-        }
-        
-        //For some reason, Electron 9 doesn't send this object as is without stringifying. Usually when variable is external to function own scope
-		try {
-			ri.bounds = JSON.parse(renderInfo.bounds);
-		}
-		catch(e) {}
+        .once(
+          "render-finished",
+          (event: Electron.IpcMainEvent, renderInfo: any) => {
+            var ri: RenderInfo = {
+              pageCount: renderInfo.pageCount,
+              bounds: null,
+            };
 
-        if (ri.bounds == null || ri.bounds.width < 5 || ri.bounds.height < 5) {
-          //A workaround to detect errors in the input file or being empty file
-          reject('input file is empty or contains errors');
-          return;
-        }
+            //For some reason, Electron 9 doesn't send this object as is without stringifying. Usually when variable is external to function own scope
+            try {
+              ri.bounds = JSON.parse(renderInfo.bounds);
+            } catch (e) {}
 
-        var p: Promise<Buffer>
-        switch(params.format) {
-          case 'pdf':
-            p = this._exportPdf(params, ri);
-            break;
-		  case 'png':
-			p = this._exportPng(params, ri);
-			break;
-          default:
-            reject(`Invalid format: ${params.format}`);
-            return;
-        }
+            if (
+              ri.bounds == null ||
+              ri.bounds.width < 5 ||
+              ri.bounds.height < 5
+            ) {
+              //A workaround to detect errors in the input file or being empty file
+              reject("input file is empty or contains errors");
+              return;
+            }
 
-        p.then((b: Buffer) => {
-          resolve({
-            buffer: b,
-          })
-        }).catch( (reason: any) => {
-          reject(reason);
-        });
-      });
+            var p: Promise<Buffer>;
+            switch (params.format) {
+              case "pdf":
+                p = this._exportPdf(params, ri);
+                break;
+              case "png":
+                p = this._exportPng(params, ri);
+                break;
+              default:
+                reject(`Invalid format: ${params.format}`);
+                return;
+            }
+
+            p.then((b: Buffer) => {
+              resolve({
+                buffer: b,
+              });
+            }).catch((reason: any) => {
+              reject(reason);
+            });
+          }
+        );
 
       /* Let's go and ask for the rendering */
-	  log.debug(`export params: ${JSON.stringify(params)}`);
+      log.debug(`export params: ${JSON.stringify(params)}`);
       var p: any = {
         xml: xmlData, // put the xmlData inside the structure
-        scale: (params.crop && (params.scale == null || params.scale == 1)) ? 1.00001: (params.scale || 1),
+        scale:
+          params.crop && (params.scale == null || params.scale == 1)
+            ? 1.00001
+            : params.scale || 1,
         format: params.format,
         from: params.sheet,
         to: params.sheet,
-		// extras parameter is expected to be in json...
-		extras: JSON.stringify({
-			layerIds: params.layers,
-		}),
+        // extras parameter is expected to be in json...
+        extras: JSON.stringify({
+          layerIds: params.layers,
+        }),
       };
-	  log.trace(`calling render`);
-      this._browser.webContents.send('render', p);
+      log.trace(`calling render`);
+      this._browser.webContents.send("render", p);
     });
   }
 
   _exportPng(params: ExportParams, ri: RenderInfo): Promise<Buffer> {
-	return new Promise<Buffer>((resolve, reject) => {
-		// Resize the browser window for a clean capture
-		this._browser.once("resize", () => {
-			this._browser.capturePage().then((image: Electron.NativeImage) => {
-				resolve(image.toPNG());
-			}).catch( (reason: any) => {
-				reject(reason);
-			});
-		});
+    return new Promise<Buffer>((resolve, reject) => {
+      // Resize the browser window for a clean capture
+      this._browser.once("resize", () => {
+        this._browser
+          .capturePage()
+          .then((image: Electron.NativeImage) => {
+            resolve(image.toPNG());
+          })
+          .catch((reason: any) => {
+            reject(reason);
+          });
+      });
 
-		//Adds an extra pixel to prevent scrollbars from showing
-		this._browser.setBounds({
-			width: Math.ceil(ri.bounds.width + ri.bounds.x) + 1,
-			height: Math.ceil(ri.bounds.height + ri.bounds.y) + 1
-		});
-	});
+      //Adds an extra pixel to prevent scrollbars from showing
+      this._browser.setBounds({
+        width: Math.ceil(ri.bounds.width + ri.bounds.x) + 1,
+        height: Math.ceil(ri.bounds.height + ri.bounds.y) + 1,
+      });
+    });
   }
 
-  _exportPdf(params: ExportParams, ri: RenderInfo): Promise<Buffer> {    
+  _exportPdf(params: ExportParams, ri: RenderInfo): Promise<Buffer> {
     // Chrome generates Pdf files larger than requested pixels size and requires scaling
     var fixingScale = 0.959;
 
     var w = Math.ceil(ri.bounds.width * fixingScale);
-    
+
     // +0.1 fixes cases where adding 1px below is not enough
     // Increase this if more cropped PDFs have extra empty pages
     var h = Math.ceil(ri.bounds.height * fixingScale + 0.1);
-    
+
     var pdfOptions: Electron.PrintToPDFOptions = {
       printBackground: true,
-      pageSize : {
+      pageSize: {
         width: w * MICRON_TO_PIXEL,
-        height: (h + 2) * MICRON_TO_PIXEL //the extra 2 pixels to prevent adding an extra empty page						
+        height: (h + 2) * MICRON_TO_PIXEL, //the extra 2 pixels to prevent adding an extra empty page
       },
-      marginsType: 1 // no margin
-    }
-    
+      marginsType: 1, // no margin
+    };
+
     return this.browser.webContents.printToPDF(pdfOptions);
   }
 
@@ -403,7 +432,6 @@ export class Exporter extends events.EventEmitter {
 				}
 			};
       */
-
 }
 
 // Bind to electron
