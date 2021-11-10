@@ -7,7 +7,7 @@ import { type } from 'os';
 import exp from 'constants';
 
 function launch(...args: string[]): Buffer {
-    let cmd = "electron-forge start -- "+ args.map(v => `'${v}'`).join(" ");   
+    let cmd = "electron-forge start -- "+ args.map(v => `"${v}"`).join(" ");   
     console.log(cmd);
     let result = child_process.spawnSync(cmd, {shell:true, cwd: path.resolve(__dirname, "..")});
     //if(result.status != 0) {
