@@ -38,7 +38,7 @@ jobs:
     needs: setup
 
     env:
-      DISPLAY: ":0"
+      DISPLAY: ":99"
 
     strategy:
       matrix:
