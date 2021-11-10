@@ -13,6 +13,7 @@ function launch(...args: string[]): Buffer {
     //if(result.status != 0) {
         console.log(result.stderr.toString());
     //}
+    console.log(result.stdout.toString());
     console.log(result);
     expect(result.status).toBe(0);
     return result.stdout
@@ -43,14 +44,14 @@ async function match(buf:Buffer, snapshotName?: string) {
 
 describe('PDF exporter tests', () => {
     it('export simple', async () => {
-        var fname = path.join(__dirname, 'drawio-diagrams', 'examples', 'AWSDiagram.xml');
+        var fname = path.join(__dirname, 'data', 'AWSDiagram.xml');
 
         let out = launch("export", fname, "-");
         await match(out, 'AWSDiagram');
     })
 
     it('export only a layer', async () => {
-        var fname = path.join(__dirname, 'drawio-diagrams', 'training-diagrams', 'drawio layers example.xml');
+        var fname = path.join(__dirname, 'data', 'drawio layers example.xml');
 
         let out = launch("export", "--layers", "Level 1 - Template", fname, "-");
         await match(out);
