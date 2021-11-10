@@ -37,6 +37,9 @@ jobs:
     runs-on: ${{ matrix.image }}
     needs: setup
 
+    env:
+      DISPLAY: ":0"
+
     strategy:
       matrix:
         platform: ["linux", "win32", "macos"]
@@ -88,7 +91,7 @@ jobs:
         name: test-results-${{ matrix.platform }}
         path: |
           junit.xml
-          tests/__snapshots__/data
+          tests/__snapshots__/*.cur.*
 
     - name: Create test report
       uses: dorny/test-reporter@v1

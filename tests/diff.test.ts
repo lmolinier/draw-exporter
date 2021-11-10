@@ -32,6 +32,7 @@ describe('Diff tests', () => {
 
         let buf1 = fs.readFileSync(path.join(__dirname, 'data', `${a}.pdf`));    
         let buf2 = fs.readFileSync(path.join(__dirname, 'data', `${b}.pdf`));
+        
         // ensure PDF images are not strictly same
         expect(buf1.toString("base64")).not.toEqual(buf2.toString("base64"));
 
