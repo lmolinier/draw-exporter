@@ -12,7 +12,7 @@ describe('Diff tests', () => {
         let pngs = await DiffUtils.pdfToPngs(buf);
 
         expect(pngs).toHaveLength(1);
-        expect(pngs[0]).toHaveLength(349250);
+        expect(pngs[0].length).toBeGreaterThan(340000);
         //fs.writeFileSync(path.join(__dirname, "__snapshots__", `${fname}.png`), pngs[0]);
     })
     it('convert PDF to PNG 2', async () => {
@@ -22,7 +22,7 @@ describe('Diff tests', () => {
         let pngs = await DiffUtils.pdfToPngs(buf);
 
         expect(pngs).toHaveLength(1);
-        expect(pngs[0]).toHaveLength(349250);
+        expect(pngs[0].length).toBeGreaterThan(340000);
         //fs.writeFileSync(path.join(__dirname, "__snapshots__", `${fname}.png`), pngs[0]);
     })
 
