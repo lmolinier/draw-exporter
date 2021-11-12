@@ -67,7 +67,11 @@ export class DiffUtils {
     return image;
   }
 
-  static diffPng(left: Buffer, right: Buffer, config?: { threshold?: number, tolerance?: number }) {
+  static diffPng(
+    left: Buffer,
+    right: Buffer,
+    config?: { threshold?: number; tolerance?: number }
+  ) {
     return new Promise<boolean>((resolve, reject) => {
       try {
         const leftpng = PNG.sync.read(left);
@@ -88,13 +92,16 @@ export class DiffUtils {
         for (var y = 0; y < height; y++) {
           for (var x = 0; x < width; x++) {
             var idx = (width * y + x) << 2;
-            if(Math.abs(leftpng.data[idx + 3]-rightpng.data[idx + 3]) > (threshold*255)) {
+            if (
+              Math.abs(leftpng.data[idx + 3] - rightpng.data[idx + 3]) >
+              threshold * 255
+            ) {
               adiff++;
               continue;
             }
           }
         }
-        if(adiff>tolerance) {
+        if (adiff > tolerance) {
           resolve(false);
           return;
         }
