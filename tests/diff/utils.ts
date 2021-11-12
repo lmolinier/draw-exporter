@@ -118,7 +118,6 @@ export class DiffUtils {
           }
         );
 
-        console.log(`delta: ${numDiffPixels}`);
         resolve(numDiffPixels <= tolerance);
       } catch (error) {
         reject(error);

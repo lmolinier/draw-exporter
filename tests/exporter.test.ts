@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as child_process from "child_process";
 
-import { DiffPdf, DiffPng, DiffFile } from "./diff";
+import { DiffPdf, DiffPng, DiffSvg } from "./diff";
 
 function launch(...args: string[]) {
   let cmd = "electron-forge start -- " + args.map((v) => `"${v}"`).join(" ");
@@ -55,7 +55,7 @@ async function run(
       d = new DiffPng(snap, buf, { threshold: 0.05 });
       break;
     case "svg":
-      d = new DiffFile(snap, buf);
+      d = new DiffSvg(snap, buf);
       break;
   }
   expect(await d.compare()).toEqual(true);
