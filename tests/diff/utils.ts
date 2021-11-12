@@ -1,4 +1,5 @@
 import * as pdfjslib from "pdfjs-dist/legacy/build/pdf";
+import pixelmatch from "pixelmatch";
 
 import { PNG } from "pngjs";
 import { createCanvas } from "canvas";
@@ -66,7 +67,7 @@ export class DiffUtils {
     return image;
   }
 
-  static diffPng(left: Buffer, right: Buffer, config?: { threshold?: number }) {
+  static diffPng(left: Buffer, right: Buffer, config?: { threshold?: number, tolerance?: number }) {
     return new Promise<boolean>((resolve, reject) => {
       try {
         const leftpng = PNG.sync.read(left);
@@ -79,34 +80,39 @@ export class DiffUtils {
           return;
         }
 
-        // Compare pixel by pixel (quite long operation...)
-        let diff = 0;
+        let threshold = config && config.threshold ? config.threshold : 0.1;
+        let tolerance = config && config.tolerance ? config.tolerance : 10;
+
+        // Check alpha
+        let adiff = 0;
         for (var y = 0; y < height; y++) {
           for (var x = 0; x < width; x++) {
             var idx = (width * y + x) << 2;
-
-            // RGB
-            if (
-              leftpng.data[idx] != leftpng.data[idx] /*red*/ ||
-              leftpng.data[idx + 1] != rightpng.data[idx + 1] /*green*/ ||
-              leftpng.data[idx + 2] != rightpng.data[idx + 2] /*/blue*/
-            ) {
-              diff++;
-              continue;
-            }
-
-            // alpha
-            if (
-              leftpng.alpha &&
-              leftpng.data[idx + 3] != rightpng.data[idx + 3]
-            ) {
-              diff++;
+            if(Math.abs(leftpng.data[idx + 3]-rightpng.data[idx + 3]) > (threshold*255)) {
+              adiff++;
               continue;
             }
           }
         }
+        if(adiff>tolerance) {
+          resolve(false);
+          return;
+        }
 
-        resolve(diff == 0);
+        // Compare pixel by pixel (quite long operation...)
+        let numDiffPixels = pixelmatch(
+          rightpng.data,
+          leftpng.data,
+          diffpng.data,
+          width,
+          height,
+          {
+            threshold: threshold,
+          }
+        );
+
+        console.log(`delta: ${numDiffPixels}`);
+        resolve(numDiffPixels <= tolerance);
       } catch (error) {
         reject(error);
       }
