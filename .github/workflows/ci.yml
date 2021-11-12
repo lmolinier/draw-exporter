@@ -9,33 +9,33 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     steps:
-    - name: Check out Git repository
-      uses: actions/checkout@v1
-      with:
-        submodules: recursive
+      - name: Check out Git repository
+        uses: actions/checkout@v1
+        with:
+          submodules: recursive
 
-    - name: Install Node.js, NPM and Yarn
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ env.node-version }}
+      - name: Install Node.js, NPM and Yarn
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ env.node-version }}
 
-    - name: Get yarn cache directory path
-      id: yarn-cache-dir-path
-      run: echo "::set-output name=dir::$(yarn cache dir)"
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
 
-    - uses: actions/cache@v1
-      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-      with:
-        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-        restore-keys: ${{ runner.os }}-yarn-
+      - uses: actions/cache@v1
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-
 
-    - name: Install dependencies
-      run: yarn
+      - name: Install dependencies
+        run: yarn
 
-    - name: Formatter
-      run: yarn format-check
-      
+      - name: Formatter
+        run: yarn format-check
+
   test:
     runs-on: ${{ matrix.image }}
     needs: prepare
@@ -43,71 +43,70 @@ jobs:
     strategy:
       matrix:
         platform: ["linux", "win32", "macos"]
-        include: 
-        - platform: linux
-          image: ubuntu-latest
-        - platform: win32
-          image: windows-latest
-        - platform: macos
-          image: macos-latest
+        include:
+          - platform: linux
+            image: ubuntu-latest
+          - platform: win32
+            image: windows-latest
+          - platform: macos
+            image: macos-latest
       fail-fast: false
 
     steps:
-    - name: Check out Git repository
-      uses: actions/checkout@v1
-      with:
-        submodules: recursive
+      - name: Check out Git repository
+        uses: actions/checkout@v1
+        with:
+          submodules: recursive
 
-    - name: Install Node.js, NPM and Yarn
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ env.node-version }}
+      - name: Install Node.js, NPM and Yarn
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ env.node-version }}
 
-    - name: Get yarn cache directory path
-      id: yarn-cache-dir-path
-      run: echo "::set-output name=dir::$(yarn cache dir)"
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
 
-    - uses: actions/cache@v1
-      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-      with:
-        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-        restore-keys: ${{ runner.os }}-yarn-
+      - uses: actions/cache@v1
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-
 
-    - name: Install dependencies
-      run: yarn
+      - name: Install dependencies
+        run: yarn
 
-    - name: Typsecript build
-      run: yarn tsc
+      - name: Typsecript build
+        run: yarn tsc
 
-    - name: Test
-      uses: GabrielBB/xvfb-action@v1
-      with:
-        run: |
-          yarn test
-    
-    - name: Upload test results
-      if: success() || failure()
-      uses: actions/upload-artifact@v2
-      with:
-        name: test-results-${{ matrix.platform }}
-        path: |
-          junit.xml
-          tests/__snapshots__/*.cur.*
+      - name: Test
+        uses: GabrielBB/xvfb-action@v1
+        with:
+          run: |
+            yarn test
 
-    - name: Create test report
-      uses: dorny/test-reporter@v1
-      if: success() || failure()
-      with:
-        name: JEST Tests ${{ matrix.platform }}
-        path: junit.xml
-        reporter: jest-junit
+      - name: Upload test results
+        if: success() || failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results-${{ matrix.platform }}
+          path: |
+            junit.xml
+            tests/__snapshots__/*.cur.*
 
-    - uses: actions/cache@v1
-      with:
-        path: out
-        key: out-${{ matrix.platform }}-${{ github.sha }}
+      - name: Create test report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: JEST Tests ${{ matrix.platform }}
+          path: junit.xml
+          reporter: jest-junit
 
+      - uses: actions/cache@v1
+        with:
+          path: out
+          key: out-${{ matrix.platform }}-${{ github.sha }}
 
   build:
     runs-on: ${{ matrix.image }}
@@ -116,51 +115,51 @@ jobs:
     strategy:
       matrix:
         platform: ["linux", "win32", "macos"]
-        include: 
-        - platform: linux
-          image: ubuntu-latest
-        - platform: win32
-          image: windows-latest
-        - platform: macos
-          image: macos-latest
+        include:
+          - platform: linux
+            image: ubuntu-latest
+          - platform: win32
+            image: windows-latest
+          - platform: macos
+            image: macos-latest
       fail-fast: false
 
     steps:
-    - name: Check out Git repository
-      uses: actions/checkout@v1
-      with:
-        submodules: recursive
+      - name: Check out Git repository
+        uses: actions/checkout@v1
+        with:
+          submodules: recursive
 
-    - name: Install Node.js, NPM and Yarn
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ env.node-version }}
+      - name: Install Node.js, NPM and Yarn
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ env.node-version }}
 
-    - name: Get yarn cache directory path
-      id: yarn-cache-dir-path
-      run: echo "::set-output name=dir::$(yarn cache dir)"
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
 
-    - uses: actions/cache@v1
-      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-      with:
-        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-        restore-keys: ${{ runner.os }}-yarn-
+      - uses: actions/cache@v1
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-
 
-    - name: Install dependencies
-      run: yarn
+      - name: Install dependencies
+        run: yarn
 
-    - name: Typsecript build
-      run: yarn tsc
+      - name: Typsecript build
+        run: yarn tsc
 
-    - name: Package
-      run: |
-        yarn run publish --dry-run
+      - name: Package
+        run: |
+          yarn run publish --dry-run
 
-    - uses: actions/cache@v1
-      with:
-        path: out
-        key: out-${{ matrix.platform }}-${{ github.run_number }}
+      - uses: actions/cache@v1
+        with:
+          path: out
+          key: out-${{ matrix.platform }}-${{ github.run_number }}
 
   publish:
     needs: [build]
