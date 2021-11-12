@@ -33,7 +33,7 @@ export class ExportParams {
   show?: boolean;
   scale: number | "auto" | null;
   crop: boolean;
-  format: "pdf" | "png";
+  format: "pdf" | "png" | "svg";
   sheet: number;
   layers: string[];
   options?: PngParams | BitmapParams;
@@ -187,6 +187,9 @@ export class Exporter extends events.EventEmitter {
               case "png":
                 p = this._exportPng(params, ri);
                 break;
+              case "svg":
+                p = this._exportSvg(params, ri);
+                break;
               default:
                 reject(`Invalid format: ${params.format}`);
                 return;
@@ -265,6 +268,15 @@ export class Exporter extends events.EventEmitter {
     };
 
     return this.browser.webContents.printToPDF(pdfOptions);
+  }
+
+  _exportSvg(params: ExportParams, ri: RenderInfo): Promise<Buffer> {
+    return new Promise<Buffer>( (resolve, reject) => {
+      ipcMain.once('svg-data', (event: Electron.IpcMainEvent, data: Buffer) => {
+        resolve(data);
+      })
+      this.browser.webContents.send('get-svg-data');
+    });
   }
 
   /*

@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as child_process from "child_process";
 
-import { Diff } from "./diff";
+import { DiffPdf, DiffPng, DiffFile } from "./diff";
 import { type } from "os";
 import exp from "constants";
 
@@ -22,7 +22,7 @@ function launch(...args: string[]): Buffer {
   return result.stdout;
 }
 
-async function match(buf: Buffer, type: "pdf" | "png", snapshotName?: string) {
+async function match(buf: Buffer, type: "pdf" | "png" | "svg", snapshotName?: string) {
   var fname = snapshotName;
   if (snapshotName === undefined) {
     fname = expect.getState().currentTestName;
@@ -41,27 +41,33 @@ async function match(buf: Buffer, type: "pdf" | "png", snapshotName?: string) {
   // Files under 2K are wierd!
   expect(buf.length).toBeGreaterThan(2 * 1024);
 
-  var d = new Diff(snap, buf, { threshold: 0.05 });
-  let res = await d.compare();
-  if (typeof res == "boolean") {
-    expect(res).toEqual(true);
-  } else {
-    expect(res.reduce((sum, v) => sum + v.ndiff, 0)).toEqual(0);
+  var d: any;
+  switch(type) {
+    case "pdf":
+      d = new DiffPdf(snap, buf, { threshold: 0.05 });
+      break;
+    case "png":
+      d = new DiffPng(snap, buf, { threshold: 0.05 });
+      break;
+    case "svg": 
+      d = new DiffFile(snap, buf);
+      break;
   }
+  expect(await d.compare()).toEqual(true);
 }
 
 describe("PDF exporter tests", () => {
   it("export simple", async () => {
     var fname = path.join(__dirname, "data", "AWSDiagram.xml");
 
-    let out = launch("export", fname, "-");
+    let out = launch("pdf", fname, "-");
     await match(out, "pdf", "AWSDiagram");
   });
 
   it("export only a layer", async () => {
     var fname = path.join(__dirname, "data", "drawio layers example.xml");
 
-    let out = launch("export", "--layers", "Level 1 - Template", fname, "-");
+    let out = launch("pdf", "--layers", "Level 1 - Template", fname, "-");
     await match(out, "pdf", "OneLayer");
   });
 });
@@ -70,36 +76,37 @@ describe("PNG exporter tests", () => {
   it("export simple", async () => {
     var fname = path.join(__dirname, "data", "AWSDiagram.xml");
 
-    let out = launch("export", "--format", "png", fname, "-");
+    let out = launch("png", fname, "-");
     await match(out, "png", "AWSDiagram");
   });
 
   it("export only a layer", async () => {
     var fname = path.join(__dirname, "data", "drawio layers example.xml");
 
-    let out = launch(
-      "export",
-      "--format",
-      "png",
-      "--layers",
-      "Level 1 - Template",
-      fname,
-      "-"
-    );
+    let out = launch("png", "--layers", "Level 1 - Template", fname, "-");
     await match(out, "png", "OneLayer");
   });
 
   it("export with background", async () => {
     var fname = path.join(__dirname, "data", "AWSDiagram.xml");
 
-    let out = launch(
-      "export",
-      "--format",
-      "png",
-      "--no-transparent",
-      fname,
-      "-"
-    );
+    let out = launch("png", "--no-transparent", fname, "-");
     await match(out, "png", "AWSDiagramWithBackground");
+  });
+});
+
+describe("SVG exporter tests", () => {
+  it("export simple", async () => {
+    var fname = path.join(__dirname, "data", "AWSDiagram.xml");
+
+    let out = launch("svg", fname, "-");
+    await match(out, "svg", "AWSDiagram");
+  });
+
+  it("export only a layer", async () => {
+    var fname = path.join(__dirname, "data", "drawio layers example.xml");
+
+    let out = launch("svg", "--layers", "Level 1 - Template", fname, "-");
+    await match(out, "svg", "OneLayer");
   });
 });

@@ -3,7 +3,10 @@ import { app } from "electron";
 import { OptionValues, program } from "commander";
 import { sheetsCommand } from "./commands/sheets";
 import { layersCommand } from "./commands/layers";
-import { exportCommand } from "./commands/export";
+import { exportPngCommand } from "./commands/png";
+import { exportPdfCommand } from "./commands/pdf";
+import { exportSvgCommand } from "./commands/svg";
+
 import { Exporter } from "./exporter";
 
 async function main(): Promise<number> {
@@ -17,17 +20,24 @@ async function main(): Promise<number> {
 
     sheetsCommand(cli);
     layersCommand(cli);
-    exportCommand(cli);
+    exportPdfCommand(cli);
+    exportPngCommand(cli);
+    exportSvgCommand(cli);
 
-    cli
-      .parseAsync()
-      .then(() => {
-        resolve(0);
-      })
-      .catch((reason: any) => {
-        console.log(`error: ${reason}`);
-        resolve(1);
-      });
+    try {
+      cli
+        .parseAsync()
+        .then(() => {
+          resolve(0);
+        })
+        .catch((reason: any) => {
+          console.error(`error: ${reason}`);
+          resolve(1);
+        });
+    } catch (e) {
+      console.error(`uncatched error: ${e}`);
+      resolve(1);
+    }
   });
 }
 
