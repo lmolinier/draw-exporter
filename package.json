@@ -9,7 +9,7 @@
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
     "lint": "eslint src/**/*.ts",
-    "test": "jest --ci --reporters=default --reporters=jest-junit",
+    "test": "tsc && jest --ci --reporters=default --reporters=jest-junit",
     "start": "tsc && electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",

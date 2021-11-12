@@ -12,7 +12,8 @@ export function exportCommand(cli: Command) {
       .description('Export diagram'),
   )
       .option('-f, --format <extension>', 'export format (pdf, png, svg)', 'pdf')
-      .option('-c, --crop', 'crop to content', true)
+      .option('--no-crop', 'do not crop to content')
+      .option('--no-transparent', 'disable transparent background (if applicable)')
 
       .option('-s, --sheet <name>', 'select sheet to print by its name (default: first)', null)
       .option('--sheet-index <number>', 'select sheet by it index (if --sheet is not set)', '0')
@@ -52,12 +53,12 @@ export function exportCommand(cli: Command) {
             Exporter.getInstance().on('ready', (exporter: Exporter) => {
               exporter.export(mxf.xml, {
                 scale: 1,
-                crop: opts.crop,
+                crop: !opts.no_crop,
                 format: opts.format,
                 sheet: sheetIndex,
                 layers: Array(...layers),
                 options: {
-                  transparent: true,
+                  transparent: !opts.no_transparent,
                 },
               }).then( (res: ExportResult) => {
                 log.info(`export size ${res.buffer.byteLength}B`);

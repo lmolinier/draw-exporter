@@ -22,7 +22,7 @@ function launch(...args: string[]): Buffer {
   return result.stdout;
 }
 
-async function match(buf: Buffer, snapshotName?: string) {
+async function match(buf: Buffer, type: "pdf" | "png", snapshotName?: string) {
   var fname = snapshotName;
   if (snapshotName === undefined) {
     fname = expect.getState().currentTestName;
@@ -30,12 +30,12 @@ async function match(buf: Buffer, snapshotName?: string) {
 
   fs.mkdirSync(path.join(__dirname, "__snapshots__"), { recursive: true });
   fs.writeFileSync(
-    path.join(__dirname, "__snapshots__", `${fname}.cur.pdf`),
+    path.join(__dirname, "__snapshots__", `${fname}.cur.${type}`),
     buf
   );
 
   var snap = fs.readFileSync(
-    path.join(__dirname, "__snapshots__", `${fname}.snap.pdf`)
+    path.join(__dirname, "__snapshots__", `${fname}.snap.${type}`)
   );
 
   // Files under 2K are wierd!
@@ -55,13 +55,36 @@ describe("PDF exporter tests", () => {
     var fname = path.join(__dirname, "data", "AWSDiagram.xml");
 
     let out = launch("export", fname, "-");
-    await match(out, "AWSDiagram");
+    await match(out, "pdf", "AWSDiagram");
   });
 
   it("export only a layer", async () => {
     var fname = path.join(__dirname, "data", "drawio layers example.xml");
 
     let out = launch("export", "--layers", "Level 1 - Template", fname, "-");
-    await match(out);
+    await match(out, "pdf", "OneLayer");
   });
+});
+
+describe("PNG exporter tests", () => {
+    it("export simple", async () => {
+        var fname = path.join(__dirname, "data", "AWSDiagram.xml");
+    
+        let out = launch("export", "--format", "png", fname, "-");
+        await match(out, "png", "AWSDiagram");
+      });
+    
+      it("export only a layer", async () => {
+        var fname = path.join(__dirname, "data", "drawio layers example.xml");
+    
+        let out = launch("export", "--format", "png", "--layers", "Level 1 - Template", fname, "-");
+        await match(out, "png", "OneLayer");
+      });
+
+      it("export with background", async () => {
+        var fname = path.join(__dirname, "data", "AWSDiagram.xml");
+    
+        let out = launch("export", "--format", "png", "--no-transparent", fname, "-");
+        await match(out, "png", "AWSDiagramWithBackground");
+      });
 });
