@@ -21,6 +21,18 @@ export class DiffFile {
   }
 }
 
+export class DiffSvg extends DiffFile {
+
+  constructor(left: Buffer, right: Buffer) {
+    super(left, right);
+  }
+
+  async compare(): Promise<boolean> {
+    this.right = Buffer.from(this.right.toString().replace('\r', '\n'));
+    return await super.compare()
+  }
+}
+
 export class DiffPng extends DiffFile {
   config: DiffConfig;
 
