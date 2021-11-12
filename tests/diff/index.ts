@@ -17,7 +17,7 @@ export class DiffFile {
 
   async compare(): Promise<boolean> {
     // Check if buffer equals
-    return this.left.compare(this.right) === 0
+    return this.left.compare(this.right) === 0;
   }
 }
 
@@ -25,7 +25,7 @@ export class DiffPng extends DiffFile {
   config: DiffConfig;
 
   constructor(left: Buffer, right: Buffer, config?: DiffConfig) {
-    super(left, right)
+    super(left, right);
     this.config = config;
   }
 
@@ -34,10 +34,10 @@ export class DiffPng extends DiffFile {
       return true;
     }
 
-    let res =  await DiffUtils.diffPng(this.left, this.right, {
+    let res = await DiffUtils.diffPng(this.left, this.right, {
       threshold: this.config.threshold,
-    })
-    return res.ndiff==0;
+    });
+    return res.ndiff == 0;
   }
 }
 
@@ -67,9 +67,13 @@ export class DiffPdf extends DiffFile {
     }
 
     for (let index = 0; index < leftPngs.length; index++) {
-      let m = await new DiffPng(leftPngs[index], rightPngs[index], this.config).compare() 
-      if(!m) {
-        return false
+      let m = await new DiffPng(
+        leftPngs[index],
+        rightPngs[index],
+        this.config
+      ).compare();
+      if (!m) {
+        return false;
       }
     }
     return true;

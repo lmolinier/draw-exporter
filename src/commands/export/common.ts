@@ -9,7 +9,11 @@ export class CommonOptions {
       .option("--scale <scale>", "scale factor at export", "1");
   }
 
-  static prepare(mxf: MxFile, opts: OptionValues, params: ExportParams): ExportParams {
+  static prepare(
+    mxf: MxFile,
+    opts: OptionValues,
+    params: ExportParams
+  ): ExportParams {
     params.scale = Number(opts.scale);
     params.crop = opts.crop;
     return params;

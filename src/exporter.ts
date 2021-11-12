@@ -271,11 +271,11 @@ export class Exporter extends events.EventEmitter {
   }
 
   _exportSvg(params: ExportParams, ri: RenderInfo): Promise<Buffer> {
-    return new Promise<Buffer>( (resolve, reject) => {
-      ipcMain.once('svg-data', (event: Electron.IpcMainEvent, data: Buffer) => {
+    return new Promise<Buffer>((resolve, reject) => {
+      ipcMain.once("svg-data", (event: Electron.IpcMainEvent, data: Buffer) => {
         resolve(data);
-      })
-      this.browser.webContents.send('get-svg-data');
+      });
+      this.browser.webContents.send("get-svg-data");
     });
   }
 

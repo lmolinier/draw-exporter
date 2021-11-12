@@ -75,7 +75,11 @@ export class ParseOptions {
       );
   }
 
-  static prepare(mxf: MxFile, opts: OptionValues, params: ExportParams): ExportParams {
+  static prepare(
+    mxf: MxFile,
+    opts: OptionValues,
+    params: ExportParams
+  ): ExportParams {
     const sheet = resolveSheet(mxf, opts);
     if (sheet === undefined) {
       throw Error(

@@ -15,36 +15,34 @@ export function exportPdfCommand(cli: Command) {
           .description("PDF Export diagram")
       )
     )
-  )
+  ).action(function (inFile: string, outFile: string, opts: OptionValues) {
+    setupLogging(opts);
+    return new Promise<void>((resolve, reject) => {
+      const mxf = new MxFile(inFile);
+      mxf.parse().then((content: any) => {
+        let params: ExportParams = {
+          scale: undefined,
+          crop: undefined,
+          format: "pdf",
+          sheet: undefined,
+          layers: [],
+          options: undefined,
+        };
 
-    .action(function (inFile: string, outFile: string, opts: OptionValues) {
-      setupLogging(opts);
-      return new Promise<void>((resolve, reject) => {
-        const mxf = new MxFile(inFile);
-        mxf.parse().then((content: any) => {
-          let params: ExportParams = {
-            scale: undefined,
-            crop: undefined,
-            format: "pdf",
-            sheet: undefined,
-            layers: [],
-            options: undefined,
-          };
-
-          try {
-            params = ParseOptions.prepare(mxf, opts, params);
-            params = CommonOptions.prepare(mxf, opts, params);
-          } catch (e) {
-            reject(e);
-          }
-          doExport(mxf, outFile, params)
-            .then(() => {
-              resolve();
-            })
-            .catch((reason: any) => {
-              reject(reason);
-            });
-        });
+        try {
+          params = ParseOptions.prepare(mxf, opts, params);
+          params = CommonOptions.prepare(mxf, opts, params);
+        } catch (e) {
+          reject(e);
+        }
+        doExport(mxf, outFile, params)
+          .then(() => {
+            resolve();
+          })
+          .catch((reason: any) => {
+            reject(reason);
+          });
       });
     });
+  });
 }

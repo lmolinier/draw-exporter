@@ -22,7 +22,11 @@ function launch(...args: string[]): Buffer {
   return result.stdout;
 }
 
-async function match(buf: Buffer, type: "pdf" | "png" | "svg", snapshotName?: string) {
+async function match(
+  buf: Buffer,
+  type: "pdf" | "png" | "svg",
+  snapshotName?: string
+) {
   var fname = snapshotName;
   if (snapshotName === undefined) {
     fname = expect.getState().currentTestName;
@@ -42,14 +46,14 @@ async function match(buf: Buffer, type: "pdf" | "png" | "svg", snapshotName?: st
   expect(buf.length).toBeGreaterThan(2 * 1024);
 
   var d: any;
-  switch(type) {
+  switch (type) {
     case "pdf":
       d = new DiffPdf(snap, buf, { threshold: 0.05 });
       break;
     case "png":
       d = new DiffPng(snap, buf, { threshold: 0.05 });
       break;
-    case "svg": 
+    case "svg":
       d = new DiffFile(snap, buf);
       break;
   }
