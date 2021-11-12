@@ -46,6 +46,21 @@ describe("Diff tests", () => {
 
     // ensure this is the same image
     let result = await DiffUtils.diffPng(png1, png2);
-    expect(result.ndiff).toEqual(0);
+    expect(result).toBeTruthy();
+  });
+
+  it("diff PNGs with/witout background", async () => {
+    let a = "diff-background.png";
+    let b = "diff-wo-background.png";
+
+    let buf1 = fs.readFileSync(path.join(__dirname, "data", a));
+    let buf2 = fs.readFileSync(path.join(__dirname, "data", b));
+
+    // ensure PDF images are not strictly same
+    expect(buf1.toString("base64")).not.toEqual(buf2.toString("base64"));
+
+    // ensure this is the *NOT* same image
+    let result = await DiffUtils.diffPng(buf1, buf2);
+    expect(result).toBeFalsy();
   });
 });

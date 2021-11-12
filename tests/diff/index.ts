@@ -37,7 +37,7 @@ export class DiffPng extends DiffFile {
     let res = await DiffUtils.diffPng(this.left, this.right, {
       threshold: this.config.threshold,
     });
-    return res.ndiff == 0;
+    return res;
   }
 }
 

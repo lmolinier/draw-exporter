@@ -1,7 +1,6 @@
 import * as pdfjslib from "pdfjs-dist/legacy/build/pdf";
 
 import { PNG } from "pngjs";
-import pixelmatch from "pixelmatch";
 import { createCanvas } from "canvas";
 import { PDFDocumentProxy } from "pdfjs-dist/types/src/display/api";
 
@@ -68,30 +67,46 @@ export class DiffUtils {
   }
 
   static diffPng(left: Buffer, right: Buffer, config?: { threshold?: number }) {
-    return new Promise<{ ndiff: number; diff?: Buffer }>((resolve, reject) => {
+    return new Promise<boolean>((resolve, reject) => {
       try {
         const leftpng = PNG.sync.read(left);
         const rightpng = PNG.sync.read(right);
         const { width, height } = leftpng;
         const diffpng = new PNG({ width, height });
 
-        if(leftpng.alpha != rightpng.alpha) {
-          return { ndiff: Number.POSITIVE_INFINITY }
+        if (leftpng.alpha != rightpng.alpha) {
+          resolve(false);
+          return;
         }
 
         // Compare pixel by pixel (quite long operation...)
-        let threshold = config && config.threshold ? config.threshold : 0.05;
-        let numDiffPixels = pixelmatch(
-          rightpng.data,
-          leftpng.data,
-          diffpng.data,
-          width,
-          height,
-          {
-            threshold: threshold,
+        let diff = 0;
+        for (var y = 0; y < height; y++) {
+          for (var x = 0; x < width; x++) {
+            var idx = (width * y + x) << 2;
+
+            // RGB
+            if (
+              leftpng.data[idx] != leftpng.data[idx] /*red*/ ||
+              leftpng.data[idx + 1] != rightpng.data[idx + 1] /*green*/ ||
+              leftpng.data[idx + 2] != rightpng.data[idx + 2] /*/blue*/
+            ) {
+              diff++;
+              continue;
+            }
+
+            // alpha
+            if (
+              leftpng.alpha &&
+              leftpng.data[idx + 3] != rightpng.data[idx + 3]
+            ) {
+              diff++;
+              continue;
+            }
           }
-        );
-        resolve({ ndiff: numDiffPixels, diff: PNG.sync.write(diffpng) });
+        }
+
+        resolve(diff == 0);
       } catch (error) {
         reject(error);
       }
