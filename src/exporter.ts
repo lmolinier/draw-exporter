@@ -216,6 +216,7 @@ export class Exporter extends events.EventEmitter {
         format: params.format,
         from: params.sheet,
         to: params.sheet,
+        bg: (params.options as PngParams)?.transparent ? "none" : "#ffffff",
         // extras parameter is expected to be in json...
         extras: JSON.stringify({
           layerIds: params.layers,

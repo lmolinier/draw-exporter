@@ -88,7 +88,7 @@ describe("PNG exporter tests", () => {
 
   it("export with background", async () => {
     var fname = path.join(__dirname, "data", "AWSDiagram.xml");
-    await run(fname, "png", "AWSDiagramWithBackground");
+    await run(fname, "png", "AWSDiagramWithBackground", ["--no-transparent"]);
   });
 });
 

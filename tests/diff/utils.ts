@@ -75,8 +75,12 @@ export class DiffUtils {
         const { width, height } = leftpng;
         const diffpng = new PNG({ width, height });
 
-        let threshold = config && config.threshold ? config.threshold : 0.05;
+        if(leftpng.alpha != rightpng.alpha) {
+          return { ndiff: Number.POSITIVE_INFINITY }
+        }
 
+        // Compare pixel by pixel (quite long operation...)
+        let threshold = config && config.threshold ? config.threshold : 0.05;
         let numDiffPixels = pixelmatch(
           rightpng.data,
           leftpng.data,
