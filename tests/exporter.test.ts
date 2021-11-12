@@ -67,24 +67,39 @@ describe("PDF exporter tests", () => {
 });
 
 describe("PNG exporter tests", () => {
-    it("export simple", async () => {
-        var fname = path.join(__dirname, "data", "AWSDiagram.xml");
-    
-        let out = launch("export", "--format", "png", fname, "-");
-        await match(out, "png", "AWSDiagram");
-      });
-    
-      it("export only a layer", async () => {
-        var fname = path.join(__dirname, "data", "drawio layers example.xml");
-    
-        let out = launch("export", "--format", "png", "--layers", "Level 1 - Template", fname, "-");
-        await match(out, "png", "OneLayer");
-      });
+  it("export simple", async () => {
+    var fname = path.join(__dirname, "data", "AWSDiagram.xml");
 
-      it("export with background", async () => {
-        var fname = path.join(__dirname, "data", "AWSDiagram.xml");
-    
-        let out = launch("export", "--format", "png", "--no-transparent", fname, "-");
-        await match(out, "png", "AWSDiagramWithBackground");
-      });
+    let out = launch("export", "--format", "png", fname, "-");
+    await match(out, "png", "AWSDiagram");
+  });
+
+  it("export only a layer", async () => {
+    var fname = path.join(__dirname, "data", "drawio layers example.xml");
+
+    let out = launch(
+      "export",
+      "--format",
+      "png",
+      "--layers",
+      "Level 1 - Template",
+      fname,
+      "-"
+    );
+    await match(out, "png", "OneLayer");
+  });
+
+  it("export with background", async () => {
+    var fname = path.join(__dirname, "data", "AWSDiagram.xml");
+
+    let out = launch(
+      "export",
+      "--format",
+      "png",
+      "--no-transparent",
+      fname,
+      "-"
+    );
+    await match(out, "png", "AWSDiagramWithBackground");
+  });
 });
