@@ -1,21 +1,21 @@
-import {Command, OptionValues} from 'commander';
-import {ExportParams} from '../exporter';
-import {MxFile} from '../diagram';
-import {setupLogging, withLoggingOptions} from '../logging';
-import {CommonOptions} from './export/common';
-import {ParseOptions} from './export/parse';
-import {doExport} from './export/utils';
+import { Command, OptionValues } from "commander";
+import { ExportParams } from "../exporter";
+import { MxFile } from "../diagram";
+import { setupLogging, withLoggingOptions } from "../logging";
+import { CommonOptions } from "./export/common";
+import { ParseOptions } from "./export/parse";
+import { doExport } from "./export/utils";
 
 export function exportPdfCommand(cli: Command) {
   withLoggingOptions(
-      CommonOptions.with(
-          ParseOptions.with(
-              cli
-                  .command('pdf <input-file> <output-file>')
-                  .description('PDF Export diagram'),
-          ),
-      ),
-  ).action(function(inFile: string, outFile: string, opts: OptionValues) {
+    CommonOptions.with(
+      ParseOptions.with(
+        cli
+          .command("pdf <input-file> <output-file>")
+          .description("PDF Export diagram")
+      )
+    )
+  ).action(function (inFile: string, outFile: string, opts: OptionValues) {
     setupLogging(opts);
     return new Promise<void>((resolve, reject) => {
       const mxf = new MxFile(inFile);
@@ -23,7 +23,7 @@ export function exportPdfCommand(cli: Command) {
         let params: ExportParams = {
           scale: undefined,
           crop: undefined,
-          format: 'pdf',
+          format: "pdf",
           sheet: undefined,
           layers: [],
           options: undefined,
@@ -36,12 +36,12 @@ export function exportPdfCommand(cli: Command) {
           reject(e);
         }
         doExport(mxf, outFile, params)
-            .then(() => {
-              resolve();
-            })
-            .catch((reason: any) => {
-              reject(reason);
-            });
+          .then(() => {
+            resolve();
+          })
+          .catch((reason: any) => {
+            reject(reason);
+          });
       });
     });
   });
