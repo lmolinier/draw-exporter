@@ -19,14 +19,23 @@ function launch(...args: string[]) {
   expect(result.status).toBe(0);
 }
 
-async function run(fname: string, type: "pdf" | "png" | "svg", snapshotName?: string, opts?: string[]) {
+async function run(
+  fname: string,
+  type: "pdf" | "png" | "svg",
+  snapshotName?: string,
+  opts?: string[]
+) {
   if (snapshotName === undefined) {
     snapshotName = expect.getState().currentTestName;
   }
-  var oname = path.join(__dirname, "__snapshots__", `${snapshotName}.cur.${type}`)
-  
+  var oname = path.join(
+    __dirname,
+    "__snapshots__",
+    `${snapshotName}.cur.${type}`
+  );
+
   // Launch the execution
-  launch(type, ...(opts??[]), fname, oname)
+  launch(type, ...(opts ?? []), fname, oname);
 
   // Compare with snapshot
   var buf = fs.readFileSync(oname);

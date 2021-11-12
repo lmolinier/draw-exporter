@@ -109,7 +109,7 @@ export class Exporter extends events.EventEmitter {
         transparent:
           params.format == "png"
             ? (params.options as PngParams)?.transparent
-            : false,
+            : true,
         enableLargerThanScreen: true,
       });
 
