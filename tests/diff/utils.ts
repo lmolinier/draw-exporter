@@ -2,6 +2,7 @@ import * as pdfjslib from "pdfjs-dist/legacy/build/pdf";
 import pixelmatch from "pixelmatch";
 
 import { PNG } from "pngjs";
+import { svg2png } from "svg-png-converter";
 import { createCanvas } from "canvas";
 import { PDFDocumentProxy } from "pdfjs-dist/types/src/display/api";
 
@@ -45,6 +46,14 @@ export class DiffUtils {
       bufs.push(await this.pdfPageToPng(d, index));
     }
     return bufs;
+  }
+
+  static async svgToPng(svg: Buffer) {
+    return await svg2png({
+      input: svg,
+      format: "png",
+      encoding: "buffer",
+    });
   }
 
   static async pdfPageToPng(

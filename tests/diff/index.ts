@@ -22,13 +22,24 @@ export class DiffFile {
 }
 
 export class DiffSvg extends DiffFile {
-  constructor(left: Buffer, right: Buffer) {
+  config: DiffConfig;
+
+  constructor(left: Buffer, right: Buffer, config?: DiffConfig) {
     super(left, right);
+    this.config = config;
   }
 
   async compare(): Promise<boolean> {
-    this.right = Buffer.from(this.right.toString().replace("\r", "\n"));
-    return await super.compare();
+    // #1: Check if file matches
+    if (await super.compare()) {
+      return true;
+    }
+
+    // #2: Else, convert the SVG to PNG
+    let leftPng = await DiffUtils.svgToPng(this.left);
+    let rightPng = await DiffUtils.svgToPng(this.right);
+
+    return await new DiffPng(leftPng, rightPng, this.config).compare();
   }
 }
 
@@ -53,8 +64,6 @@ export class DiffPng extends DiffFile {
 }
 
 export class DiffPdf extends DiffFile {
-  left: Buffer;
-  right: Buffer;
   config: DiffConfig;
 
   constructor(left: Buffer, right: Buffer, config?: DiffConfig) {

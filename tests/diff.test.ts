@@ -25,6 +25,16 @@ describe("Diff tests", () => {
     //fs.writeFileSync(path.join(__dirname, "__snapshots__", `${fname}.png`), pngs[0]);
   });
 
+  it("convert SVG to PNG", async () => {
+    var fname = "test-diff-3";
+
+    let buf = fs.readFileSync(path.join(__dirname, "data", `${fname}.svg`));
+    let png = await DiffUtils.svgToPng(buf);
+
+    expect(png.length).toBeGreaterThan(300000);
+    //fs.writeFileSync(path.join(__dirname, "data", `${fname}.png`), png);
+  });
+
   it("diff PNGs", async () => {
     let a = "test-diff-1";
     let b = "test-diff-2";
