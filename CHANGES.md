@@ -1,0 +1,1 @@
+Feature that support export for PDF, SVG & PNG.
