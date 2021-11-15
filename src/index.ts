@@ -14,7 +14,8 @@ async function main(): Promise<number> {
     const cli = program
       .name("draw-exporter")
       .action(function (inFile: string, opts: OptionValues) {
-        console.log(opts);
+        cli.outputHelp();
+        reject("No valid commands provided");
       })
       .version(app.getVersion());
 
@@ -31,12 +32,11 @@ async function main(): Promise<number> {
           resolve(0);
         })
         .catch((reason: any) => {
-          console.error(`error: ${reason}`);
-          resolve(1);
+          reject(reason);
         });
     } catch (e) {
-      console.error(`uncatched error: ${e}`);
-      resolve(1);
+      console.error("uncatched error");
+      reject(e);
     }
   });
 }

@@ -2,6 +2,9 @@ import * as fs from "fs";
 import { Parser } from "xml2js";
 import "pako";
 import pako from "pako";
+import { resolve } from "path/posix";
+import { rejects } from "assert";
+import { ConsoleLoggerImpl } from "typescript-logging";
 
 export class Layer {
   id: string;
@@ -52,12 +55,16 @@ export class MxFile {
     this.fname = fname;
   }
 
-  async parse(): Promise<any> {
-    var data = fs.readFileSync(this.fname, "utf8");
-    var parser = new Parser();
-    this.xml = data;
+  async read(fname: string): Promise<string> {
+    return fs.readFileSync(fname, "utf-8");
+  }
 
-    var result = await parser.parseStringPromise(data);
+  async parse(): Promise<any> {
+    this.xml = await this.read(this.fname)
+    console.log(this.xml);
+    var parser = new Parser();
+
+    var result = await parser.parseStringPromise(this.xml);
     this._diagrams = new Map<String, Diagram>();
 
     var i = 0;

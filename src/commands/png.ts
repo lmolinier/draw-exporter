@@ -25,33 +25,36 @@ export function exportPngCommand(cli: Command) {
       setupLogging(opts);
       return new Promise<void>((resolve, reject) => {
         const mxf = new MxFile(inFile);
-        mxf.parse().then((content: any) => {
-          let params: ExportParams = {
-            scale: undefined,
-            crop: undefined,
-            format: "png",
-            sheet: undefined,
-            layers: [],
-            options: {
-              transparent: opts.transparent,
-            },
-          };
+        mxf
+          .parse()
+          .then((content: any) => {
+            let params: ExportParams = {
+              scale: undefined,
+              crop: undefined,
+              format: "png",
+              sheet: undefined,
+              layers: [],
+              options: {
+                transparent: opts.transparent,
+              },
+            };
 
-          try {
-            params = ParseOptions.prepare(mxf, opts, params);
-            params = CommonOptions.prepare(mxf, opts, params);
-          } catch (e) {
-            reject(e);
-          }
+            try {
+              params = ParseOptions.prepare(mxf, opts, params);
+              params = CommonOptions.prepare(mxf, opts, params);
+            } catch (e) {
+              reject(e);
+            }
 
-          doExport(mxf, outFile, params)
-            .then(() => {
-              resolve();
-            })
-            .catch((reason: any) => {
-              reject(reason);
-            });
-        });
+            doExport(mxf, outFile, params)
+              .then(() => {
+                resolve();
+              })
+              .catch((reason: any) => {
+                reject(reason);
+              });
+          })
+          .catch((reason: any) => reject(reason));
       });
     });
 }
