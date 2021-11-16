@@ -61,7 +61,6 @@ export class MxFile {
 
   async parse(): Promise<any> {
     this.xml = await this.read(this.fname);
-    console.log(this.xml);
     var parser = new Parser();
 
     var result = await parser.parseStringPromise(this.xml);
