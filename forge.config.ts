@@ -1,3 +1,6 @@
+import * as fs from "fs";
+import * as path from "path";
+
 import Plugin from "@electron-forge/plugin-base";
 import { spawn, SpawnOptions } from "child_process";
 
@@ -7,6 +10,8 @@ import { readMutatedPackageJson } from "@electron-forge/core/dist/util/read-pack
 import { runHook } from "@electron-forge/core/dist/util/hook";
 import { asyncOra } from "@electron-forge/async-ora";
 import getForceConfig from "@electron-forge/core/dist/util/forge-config";
+
+import { TargetArch } from "electron-packager";
 
 class XvFbPlugin extends Plugin<any> {
   name = "xvfb";
@@ -77,7 +82,44 @@ class XvFbPlugin extends Plugin<any> {
   }
 }
 
+function afterExtractHook(
+  forgeConfig: any,
+  buildPath: string,
+  electronVersion: string,
+  platform: TargetArch,
+  arch: TargetArch,
+  callback: () => void
+) {
+  // Only on Linux
+  if (platform != "linux") {
+    return;
+  }
+  fs.renameSync(
+    path.join(buildPath, "electron"),
+    path.join(buildPath, "electron-bin")
+  );
+  fs.copyFileSync(
+    path.join(__dirname, "..", "linux-headless-wrapper.sh"),
+    path.join(buildPath, "electron")
+  );
+  fs.chmodSync(path.join(buildPath, "electron"), 0o755);
+  /*fs.readdir(buildPath as string, function (err: any, files: any[]) {
+    //handling error
+    if (err) {
+        return console.log('Unable to scan directory: ' + err);
+    }
+    //listing all files using forEach
+    files.forEach(function (file) {
+        console.log('f: ' + file);
+    });
+  });*/
+}
+
 module.exports = {
+  hooks: {
+    packageAfterExtract: afterExtractHook,
+  },
+
   makers: [
     {
       name: "@electron-forge/maker-squirrel",
