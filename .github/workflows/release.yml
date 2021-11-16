@@ -51,7 +51,7 @@ jobs:
       run: yarn
 
     - name: Run typescript
-      run: tsc
+      run: yarn build
 
     - name: Publish
       if: ${{ steps.out-cache.outputs.cache-hit }} == 'true'
