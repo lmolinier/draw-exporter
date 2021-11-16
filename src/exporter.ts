@@ -119,7 +119,7 @@ export class Exporter extends events.EventEmitter {
 
       // and load the export3.html of draw.io app.
       browser.loadFile(
-        path.join(__dirname, "../drawio/src/main/webapp/export3.html")
+        path.join(__dirname, "../../drawio/src/main/webapp/export3.html")
       );
 
       // Wait for the complete logging.
