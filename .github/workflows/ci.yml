@@ -82,6 +82,8 @@ jobs:
 
       - name: Test
         run: |
+          pwd
+          ls -lR .
           yarn test
 
       - name: Upload test results
