@@ -28,9 +28,10 @@ export class Diagram {
 
   get layers(): Map<String, Layer> {
     var layers = new Map<String, Layer>();
+    var rootLayer = this.content.root[0].mxCell.filter((elt: any) => (elt.$.parent === undefined))[0];
     this.content.root[0].mxCell
       .filter((elt: any) => {
-        if (elt.$.parent === undefined || elt.$.parent != "0") return false;
+        if (elt.$.parent === undefined || elt.$.parent != rootLayer.$.id) return false;
         return true;
       })
       .forEach((it: any) => {

@@ -31,4 +31,17 @@ describe("parser tests", () => {
       );
     });
   });
+  it("loads a diagram with layers (another)", async () => {
+    var fname = path.join(__dirname, "data", "sample.xml");
+    var mxf = new MxFile(fname);
+    await mxf.parse().then((content: any) => {
+      expect(mxf.diagrams.keys()).toContain("Page-2");
+      expect(mxf.diagrams.get("Page-2").layers.keys()).toContain(
+        "Layer-1"
+      );
+      expect(mxf.diagrams.get("Page-2").layers.keys()).toContain(
+        "Layer-2"
+      );
+    });
+  });
 });
