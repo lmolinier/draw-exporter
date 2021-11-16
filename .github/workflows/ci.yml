@@ -81,10 +81,8 @@ jobs:
         run: yarn tsc
 
       - name: Test
-        uses: GabrielBB/xvfb-action@v1
-        with:
-          run: |
-            yarn test
+        run: |
+          yarn test
 
       - name: Upload test results
         if: success() || failure()
