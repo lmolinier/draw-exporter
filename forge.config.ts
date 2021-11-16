@@ -98,6 +98,9 @@ module.exports = {
     },
     {
       name: "@electron-forge/maker-deb",
+      config: {
+        depends: ["xvfb"],
+      },
     },
     {
       name: "@electron-forge/maker-dmg",

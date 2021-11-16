@@ -12,9 +12,9 @@ function launch(...args: string[]) {
     cwd: path.resolve(__dirname, ".."),
   });
   if (result.status != 0) {
+    console.log(result.stdout.toString());
     console.log(result.stderr.toString());
   }
-  //console.log(result.stdout.toString());
   //console.log(result);
   expect(result.status).toBe(0);
 }
