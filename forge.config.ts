@@ -10,18 +10,10 @@ import getForceConfig from "@electron-forge/core/dist/util/forge-config";
 
 class XvFbPlugin extends Plugin<any> {
   name = "xvfb";
+
   async startLogic(
     _startOpts: StartOptions
   ): Promise<ElectronProcess | string | string[] | false> {
-    if (process.env.DISPLAY === undefined) {
-      process.env.DISPLAY = ":99";
-    }
-    return XvFbPlugin.defaultStart(_startOpts);
-  }
-
-  static async defaultStart(
-    _startOpts: StartOptions
-  ): Promise<ElectronProcess> {
     const forgeConfig = await getForceConfig(_startOpts.dir);
     const packageJSON = await readMutatedPackageJson(
       _startOpts.dir,

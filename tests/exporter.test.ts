@@ -6,16 +6,18 @@ import { DiffPdf, DiffPng, DiffSvg } from "./diff";
 
 function launch(...args: string[]) {
   let cmd = "electron-forge start -- " + args.map((v) => `"${v}"`).join(" ");
-  //console.log(cmd);
+
   let result = child_process.spawnSync(cmd, {
     shell: true,
     cwd: path.resolve(__dirname, ".."),
   });
   if (result.status != 0) {
+    console.log(`command: ${cmd}`);
+    console.log(`cwd: ${path.resolve(__dirname, "..")}`);
     console.log(result.stdout.toString());
     console.log(result.stderr.toString());
+    console.log(result);
   }
-  //console.log(result);
   expect(result.status).toBe(0);
 }
 
