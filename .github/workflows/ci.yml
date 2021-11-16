@@ -81,10 +81,7 @@ jobs:
         run: yarn tsc
 
       - name: Test
-        run: |
-          pwd
-          ls -lR .
-          yarn test
+        run: yarn test
 
       - name: Upload test results
         if: success() || failure()
