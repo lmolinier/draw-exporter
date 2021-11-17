@@ -94,7 +94,10 @@ export class DiffUtils {
         }
 
         let threshold = config && config.threshold ? config.threshold : 0.1;
-        let tolerance = config && config.tolerance ? config.tolerance : 10;
+        let tolerance =
+          config && config.tolerance
+            ? config.tolerance
+            : Math.floor(0.01 * height * width);
 
         // Check alpha
         let adiff = 0;
