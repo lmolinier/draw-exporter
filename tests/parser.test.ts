@@ -36,12 +36,8 @@ describe("parser tests", () => {
     var mxf = new MxFile(fname);
     await mxf.parse().then((content: any) => {
       expect(mxf.diagrams.keys()).toContain("Page-2");
-      expect(mxf.diagrams.get("Page-2").layers.keys()).toContain(
-        "Layer-1"
-      );
-      expect(mxf.diagrams.get("Page-2").layers.keys()).toContain(
-        "Layer-2"
-      );
+      expect(mxf.diagrams.get("Page-2").layers.keys()).toContain("Layer-1");
+      expect(mxf.diagrams.get("Page-2").layers.keys()).toContain("Layer-2");
     });
   });
 });

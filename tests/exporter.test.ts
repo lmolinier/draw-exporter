@@ -84,8 +84,33 @@ describe("PNG exporter tests", () => {
   });
 
   it("export only a layer", async () => {
-    var fname = path.join(__dirname, "data", "drawio layers example.xml");
-    await run(fname, "png", "OneLayer", ["--layers", "Level 1 - Template"]);
+    var fname = path.join(__dirname, "data", "sample.xml");
+    await run(fname, "png", "sampleOneLayer", [
+      "--sheet",
+      "Page-2",
+      "--layers",
+      "Layer-1",
+    ]);
+  });
+
+  it("export only another layer", async () => {
+    var fname = path.join(__dirname, "data", "sample.xml");
+    await run(fname, "png", "sampleAnotherLayer", [
+      "--sheet",
+      "Page-2",
+      "--layers",
+      "Layer-2",
+    ]);
+  });
+
+  it("export only some layers", async () => {
+    var fname = path.join(__dirname, "data", "sample.xml");
+    await run(fname, "png", "sampleSomeLayers", [
+      "--sheet",
+      "Page-2",
+      "--layers",
+      "Layer-1,Layer-2",
+    ]);
   });
 
   it("export with background", async () => {
